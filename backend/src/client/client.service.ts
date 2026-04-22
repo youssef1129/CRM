@@ -5,6 +5,7 @@ import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CLIENT_REPOSITORY } from 'src/common/constants';
+import { PaginatedClientResponseDto } from './dto/client-response.dto';
 
 @Injectable()
 export class ClientService {
@@ -18,7 +19,9 @@ export class ClientService {
     return await this.clientRepository.save(client);
   }
 
-  async findAll(query: PaginationQueryDto) {
+  async findAll(
+    query: PaginationQueryDto,
+  ): Promise<PaginatedClientResponseDto> {
     const { page = 1, limit = 10, search } = query;
     const skip = (page - 1) * limit;
 

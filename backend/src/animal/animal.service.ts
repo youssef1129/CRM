@@ -5,6 +5,7 @@ import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { ANIMAL_REPOSITORY } from 'src/common/constants';
 import { AnimalPaginationQueryDto } from './dto/animal-pagination-query.dto';
+import { PaginatedAnimalResponseDto } from './dto/animal-response.dto';
 
 @Injectable()
 export class AnimalService {
@@ -18,7 +19,9 @@ export class AnimalService {
     return await this.animalRepository.save(animal);
   }
 
-  async findAll(query: AnimalPaginationQueryDto) {
+  async findAll(
+    query: AnimalPaginationQueryDto,
+  ): Promise<PaginatedAnimalResponseDto> {
     const { page = 1, limit = 10, search, species } = query;
     const skip = (page - 1) * limit;
 

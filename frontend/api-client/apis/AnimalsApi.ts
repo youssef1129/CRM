@@ -14,12 +14,31 @@
 
 
 import * as runtime from '../runtime';
+import type {
+  Animal,
+  CreateAnimalDto,
+  PaginatedAnimalResponseDto,
+  UpdateAnimalDto,
+} from '../models/index';
+import {
+    AnimalFromJSON,
+    AnimalToJSON,
+    CreateAnimalDtoFromJSON,
+    CreateAnimalDtoToJSON,
+    PaginatedAnimalResponseDtoFromJSON,
+    PaginatedAnimalResponseDtoToJSON,
+    UpdateAnimalDtoFromJSON,
+    UpdateAnimalDtoToJSON,
+} from '../models/index';
 
 export interface AnimalControllerCreateRequest {
-    body: object;
+    createAnimalDto: CreateAnimalDto;
 }
 
 export interface AnimalControllerFindAllRequest {
+    page?: number;
+    limit?: number;
+    search?: string;
     species?: AnimalControllerFindAllSpeciesEnum;
 }
 
@@ -33,7 +52,7 @@ export interface AnimalControllerRemoveRequest {
 
 export interface AnimalControllerUpdateRequest {
     id: number;
-    body: object;
+    updateAnimalDto: UpdateAnimalDto;
 }
 
 /**
@@ -45,10 +64,10 @@ export class AnimalsApi extends runtime.BaseAPI {
      * Enregistrer un nouvel animal
      */
     async animalControllerCreateRaw(requestParameters: AnimalControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        if (requestParameters['body'] == null) {
+        if (requestParameters['createAnimalDto'] == null) {
             throw new runtime.RequiredError(
-                'body',
-                'Required parameter "body" was null or undefined when calling animalControllerCreate().'
+                'createAnimalDto',
+                'Required parameter "createAnimalDto" was null or undefined when calling animalControllerCreate().'
             );
         }
 
@@ -59,11 +78,11 @@ export class AnimalsApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/animals`,
+            path: `/api/v1/animals`,
             method: 'POST',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['body'] as any,
+            body: CreateAnimalDtoToJSON(requestParameters['createAnimalDto']),
         }, initOverrides);
 
         return new runtime.VoidApiResponse(response);
@@ -79,8 +98,20 @@ export class AnimalsApi extends runtime.BaseAPI {
     /**
      * Récupérer tous les animaux avec pagination et recherche
      */
-    async animalControllerFindAllRaw(requestParameters: AnimalControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async animalControllerFindAllRaw(requestParameters: AnimalControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedAnimalResponseDto>> {
         const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['limit'] != null) {
+            queryParameters['limit'] = requestParameters['limit'];
+        }
+
+        if (requestParameters['search'] != null) {
+            queryParameters['search'] = requestParameters['search'];
+        }
 
         if (requestParameters['species'] != null) {
             queryParameters['species'] = requestParameters['species'];
@@ -89,26 +120,27 @@ export class AnimalsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/animals`,
+            path: `/api/v1/animals`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedAnimalResponseDtoFromJSON(jsonValue));
     }
 
     /**
      * Récupérer tous les animaux avec pagination et recherche
      */
-    async animalControllerFindAll(requestParameters: AnimalControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.animalControllerFindAllRaw(requestParameters, initOverrides);
+    async animalControllerFindAll(requestParameters: AnimalControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedAnimalResponseDto> {
+        const response = await this.animalControllerFindAllRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
      * Récupérer un animal par son ID
      */
-    async animalControllerFindOneRaw(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async animalControllerFindOneRaw(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Animal>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -121,20 +153,21 @@ export class AnimalsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: `/api/v1/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalFromJSON(jsonValue));
     }
 
     /**
      * Récupérer un animal par son ID
      */
-    async animalControllerFindOne(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.animalControllerFindOneRaw(requestParameters, initOverrides);
+    async animalControllerFindOne(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Animal> {
+        const response = await this.animalControllerFindOneRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
@@ -153,7 +186,7 @@ export class AnimalsApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: `/api/v1/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
@@ -172,7 +205,7 @@ export class AnimalsApi extends runtime.BaseAPI {
     /**
      * Modifier les informations d\'un animal
      */
-    async animalControllerUpdateRaw(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async animalControllerUpdateRaw(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Animal>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -180,10 +213,10 @@ export class AnimalsApi extends runtime.BaseAPI {
             );
         }
 
-        if (requestParameters['body'] == null) {
+        if (requestParameters['updateAnimalDto'] == null) {
             throw new runtime.RequiredError(
-                'body',
-                'Required parameter "body" was null or undefined when calling animalControllerUpdate().'
+                'updateAnimalDto',
+                'Required parameter "updateAnimalDto" was null or undefined when calling animalControllerUpdate().'
             );
         }
 
@@ -194,21 +227,22 @@ export class AnimalsApi extends runtime.BaseAPI {
         headerParameters['Content-Type'] = 'application/json';
 
         const response = await this.request({
-            path: `/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
+            path: `/api/v1/animals/{id}`.replace(`{${"id"}}`, encodeURIComponent(String(requestParameters['id']))),
             method: 'PATCH',
             headers: headerParameters,
             query: queryParameters,
-            body: requestParameters['body'] as any,
+            body: UpdateAnimalDtoToJSON(requestParameters['updateAnimalDto']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalFromJSON(jsonValue));
     }
 
     /**
      * Modifier les informations d\'un animal
      */
-    async animalControllerUpdate(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.animalControllerUpdateRaw(requestParameters, initOverrides);
+    async animalControllerUpdate(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Animal> {
+        const response = await this.animalControllerUpdateRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
 }

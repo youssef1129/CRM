@@ -1,0 +1,17 @@
+apis/AnimalsApi.ts
+apis/AppApi.ts
+apis/ClientsApi.ts
+apis/CommonApi.ts
+apis/index.ts
+index.ts
+models/Animal.ts
+models/Client.ts
+models/CreateAnimalDto.ts
+models/CreateClientDto.ts
+models/PaginatedAnimalResponseDto.ts
+models/PaginatedClientResponseDto.ts
+models/PaginationMetaDto.ts
+models/UpdateAnimalDto.ts
+models/UpdateClientDto.ts
+models/index.ts
+runtime.ts

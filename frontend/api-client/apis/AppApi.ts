@@ -28,7 +28,7 @@ export class AppApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/`,
+            path: `/api/v1`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

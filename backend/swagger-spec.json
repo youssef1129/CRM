@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.0",
   "paths": {
-    "/": {
+    "/api/v1": {
       "get": {
         "operationId": "AppController_getHello",
         "parameters": [],
@@ -15,7 +15,7 @@
         ]
       }
     },
-    "/common/civilities": {
+    "/api/v1/common/civilities": {
       "get": {
         "operationId": "CommonController_getCivilities",
         "parameters": [],
@@ -30,7 +30,7 @@
         ]
       }
     },
-    "/common/species": {
+    "/api/v1/common/species": {
       "get": {
         "operationId": "CommonController_getSpecies",
         "parameters": [],
@@ -45,7 +45,7 @@
         ]
       }
     },
-    "/clients": {
+    "/api/v1/clients": {
       "post": {
         "operationId": "ClientController_create",
         "parameters": [],
@@ -61,7 +61,14 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client"
+                }
+              }
+            }
           }
         },
         "summary": "Créer un nouveau client",
@@ -71,10 +78,47 @@
       },
       "get": {
         "operationId": "ClientController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Jean",
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedClientResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Récupérer tous les clients avec pagination et recherche",
@@ -83,7 +127,7 @@
         ]
       }
     },
-    "/clients/{id}": {
+    "/api/v1/clients/{id}": {
       "get": {
         "operationId": "ClientController_findOne",
         "parameters": [
@@ -98,7 +142,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client"
+                }
+              }
+            }
           }
         },
         "summary": "Récupérer un client par son ID",
@@ -130,7 +181,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Client"
+                }
+              }
+            }
           }
         },
         "summary": "Modifier un client",
@@ -161,7 +219,7 @@
         ]
       }
     },
-    "/animals": {
+    "/api/v1/animals": {
       "post": {
         "operationId": "AnimalController_create",
         "parameters": [],
@@ -189,6 +247,35 @@
         "operationId": "AnimalController_findAll",
         "parameters": [
           {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 10,
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "example": "Jean",
+              "type": "string"
+            }
+          },
+          {
             "name": "species",
             "required": false,
             "in": "query",
@@ -206,7 +293,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedAnimalResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Récupérer tous les animaux avec pagination et recherche",
@@ -215,7 +309,7 @@
         ]
       }
     },
-    "/animals/{id}": {
+    "/api/v1/animals/{id}": {
       "get": {
         "operationId": "AnimalController_findOne",
         "parameters": [
@@ -230,7 +324,14 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Animal"
+                }
+              }
+            }
           }
         },
         "summary": "Récupérer un animal par son ID",
@@ -262,7 +363,14 @@
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Animal"
+                }
+              }
+            }
           }
         },
         "summary": "Modifier les informations d'un animal",
@@ -311,19 +419,329 @@
     "schemas": {
       "CreateClientDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "civility": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mlle"
+            ],
+            "example": "M."
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "example": "jean.dupont@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0612345678"
+          }
+        },
+        "required": [
+          "civility",
+          "firstName",
+          "lastName",
+          "email",
+          "phone"
+        ]
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "civility": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mlle"
+            ]
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "example": "jean.dupont@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0612345678"
+          },
+          "animals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Animal"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "civility",
+          "firstName",
+          "lastName",
+          "email",
+          "phone",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "Animal": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Médor"
+          },
+          "age": {
+            "type": "number",
+            "example": 5
+          },
+          "height": {
+            "type": "number",
+            "example": 45.5
+          },
+          "weight": {
+            "type": "number",
+            "example": 12.2
+          },
+          "species": {
+            "type": "string",
+            "enum": [
+              "chien",
+              "chat",
+              "hamster",
+              "tortue"
+            ]
+          },
+          "client": {
+            "$ref": "#/components/schemas/Client"
+          },
+          "clientId": {
+            "type": "number",
+            "example": 1
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "age",
+          "height",
+          "weight",
+          "species",
+          "client",
+          "clientId",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "PaginationMetaDto": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "number"
+          },
+          "itemCount": {
+            "type": "number"
+          },
+          "itemsPerPage": {
+            "type": "number"
+          },
+          "totalPages": {
+            "type": "number"
+          },
+          "currentPage": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalItems",
+          "itemCount",
+          "itemsPerPage",
+          "totalPages",
+          "currentPage"
+        ]
+      },
+      "PaginatedClientResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Client"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "pagination"
+        ]
       },
       "UpdateClientDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "civility": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mlle"
+            ],
+            "example": "M."
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "example": "jean.dupont@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0612345678"
+          }
+        }
       },
       "CreateAnimalDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Médor"
+          },
+          "age": {
+            "type": "number",
+            "example": 3
+          },
+          "height": {
+            "type": "number",
+            "example": 45.5
+          },
+          "weight": {
+            "type": "number",
+            "example": 12.2
+          },
+          "species": {
+            "type": "string",
+            "enum": [
+              "chien",
+              "chat",
+              "hamster",
+              "tortue"
+            ],
+            "example": "chien"
+          },
+          "clientId": {
+            "type": "number",
+            "example": 1
+          }
+        },
+        "required": [
+          "firstName",
+          "age",
+          "height",
+          "weight",
+          "species",
+          "clientId"
+        ]
+      },
+      "PaginatedAnimalResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Animal"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "pagination"
+        ]
       },
       "UpdateAnimalDto": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "example": "Médor"
+          },
+          "age": {
+            "type": "number",
+            "example": 3
+          },
+          "height": {
+            "type": "number",
+            "example": 45.5
+          },
+          "weight": {
+            "type": "number",
+            "example": 12.2
+          },
+          "species": {
+            "type": "string",
+            "enum": [
+              "chien",
+              "chat",
+              "hamster",
+              "tortue"
+            ],
+            "example": "chien"
+          },
+          "clientId": {
+            "type": "number",
+            "example": 1
+          }
+        }
       }
     }
   }

@@ -29,7 +29,7 @@ export class CommonApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/common/civilities`,
+            path: `/api/v1/common/civilities`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
@@ -54,7 +54,7 @@ export class CommonApi extends runtime.BaseAPI {
         const headerParameters: runtime.HTTPHeaders = {};
 
         const response = await this.request({
-            path: `/common/species`,
+            path: `/api/v1/common/species`,
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,

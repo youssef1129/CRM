@@ -12,8 +12,16 @@ import {
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
+} from '@nestjs/swagger';
+import { Client } from './entities/client.entity';
+import { PaginatedClientResponseDto } from './dto/client-response.dto';
 
 @ApiTags('clients')
 @Controller('clients')
@@ -22,6 +30,7 @@ export class ClientController {
 
   @Post()
   @ApiOperation({ summary: 'Créer un nouveau client' })
+  @ApiCreatedResponse({ type: Client })
   create(@Body() createClientDto: CreateClientDto) {
     return this.clientService.create(createClientDto);
   }
@@ -30,18 +39,21 @@ export class ClientController {
   @ApiOperation({
     summary: 'Récupérer tous les clients avec pagination et recherche',
   })
+  @ApiOkResponse({ type: PaginatedClientResponseDto })
   findAll(@Query() query: PaginationQueryDto) {
     return this.clientService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un client par son ID' })
+  @ApiOkResponse({ type: Client })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.clientService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Modifier un client' })
+  @ApiOkResponse({ type: Client })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateClientDto: UpdateClientDto,
@@ -51,6 +63,7 @@ export class ClientController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'Supprimer un client' })
+  @ApiOkResponse()
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.clientService.remove(id);
   }
