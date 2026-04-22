@@ -1,10 +1,10 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ILike, Repository } from 'typeorm';
+import { ILike, Repository, FindOptionsWhere } from 'typeorm';
 import { Animal } from './entities/animal.entity';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { ANIMAL_REPOSITORY } from 'src/common/constants';
+import { AnimalPaginationQueryDto } from './dto/animal-pagination-query.dto';
 
 @Injectable()
 export class AnimalService {
@@ -18,11 +18,19 @@ export class AnimalService {
     return await this.animalRepository.save(animal);
   }
 
-  async findAll(query: PaginationQueryDto) {
-    const { page = 1, limit = 10, search } = query;
+  async findAll(query: AnimalPaginationQueryDto) {
+    const { page = 1, limit = 10, search, species } = query;
     const skip = (page - 1) * limit;
 
-    const where = search ? { firstName: ILike(`%${search}%`) } : {};
+    const where: FindOptionsWhere<Animal> = {};
+
+    if (search) {
+      where.firstName = ILike(`%${search}%`);
+    }
+
+    if (species) {
+      where.species = species;
+    }
 
     const [items, total] = await this.animalRepository.findAndCount({
       where,

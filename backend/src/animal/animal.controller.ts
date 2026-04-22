@@ -13,7 +13,7 @@ import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { AnimalPaginationQueryDto } from './dto/animal-pagination-query.dto';
 
 @ApiTags('animals')
 @Controller('animals')
@@ -30,7 +30,7 @@ export class AnimalController {
   @ApiOperation({
     summary: 'Récupérer tous les animaux avec pagination et recherche',
   })
-  findAll(@Query() query: PaginationQueryDto) {
+  findAll(@Query() query: AnimalPaginationQueryDto) {
     return this.animalService.findAll(query);
   }
 
