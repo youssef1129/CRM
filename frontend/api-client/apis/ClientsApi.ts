@@ -15,18 +15,18 @@
 
 import * as runtime from '../runtime';
 import type {
-  Client,
+  ClientControllerCreate201Response,
+  ClientControllerFindAll200Response,
   CreateClientDto,
-  PaginatedClientResponseDto,
   UpdateClientDto,
 } from '../models/index';
 import {
-    ClientFromJSON,
-    ClientToJSON,
+    ClientControllerCreate201ResponseFromJSON,
+    ClientControllerCreate201ResponseToJSON,
+    ClientControllerFindAll200ResponseFromJSON,
+    ClientControllerFindAll200ResponseToJSON,
     CreateClientDtoFromJSON,
     CreateClientDtoToJSON,
-    PaginatedClientResponseDtoFromJSON,
-    PaginatedClientResponseDtoToJSON,
     UpdateClientDtoFromJSON,
     UpdateClientDtoToJSON,
 } from '../models/index';
@@ -62,7 +62,7 @@ export class ClientsApi extends runtime.BaseAPI {
     /**
      * Créer un nouveau client
      */
-    async clientControllerCreateRaw(requestParameters: ClientControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Client>> {
+    async clientControllerCreateRaw(requestParameters: ClientControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientControllerCreate201Response>> {
         if (requestParameters['createClientDto'] == null) {
             throw new runtime.RequiredError(
                 'createClientDto',
@@ -84,13 +84,13 @@ export class ClientsApi extends runtime.BaseAPI {
             body: CreateClientDtoToJSON(requestParameters['createClientDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ClientFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClientControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Créer un nouveau client
      */
-    async clientControllerCreate(requestParameters: ClientControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Client> {
+    async clientControllerCreate(requestParameters: ClientControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientControllerCreate201Response> {
         const response = await this.clientControllerCreateRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -98,7 +98,7 @@ export class ClientsApi extends runtime.BaseAPI {
     /**
      * Récupérer tous les clients avec pagination et recherche
      */
-    async clientControllerFindAllRaw(requestParameters: ClientControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedClientResponseDto>> {
+    async clientControllerFindAllRaw(requestParameters: ClientControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientControllerFindAll200Response>> {
         const queryParameters: any = {};
 
         if (requestParameters['page'] != null) {
@@ -122,13 +122,13 @@ export class ClientsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedClientResponseDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClientControllerFindAll200ResponseFromJSON(jsonValue));
     }
 
     /**
      * Récupérer tous les clients avec pagination et recherche
      */
-    async clientControllerFindAll(requestParameters: ClientControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedClientResponseDto> {
+    async clientControllerFindAll(requestParameters: ClientControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientControllerFindAll200Response> {
         const response = await this.clientControllerFindAllRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -136,7 +136,7 @@ export class ClientsApi extends runtime.BaseAPI {
     /**
      * Récupérer un client par son ID
      */
-    async clientControllerFindOneRaw(requestParameters: ClientControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Client>> {
+    async clientControllerFindOneRaw(requestParameters: ClientControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientControllerCreate201Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -155,13 +155,13 @@ export class ClientsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ClientFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClientControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Récupérer un client par son ID
      */
-    async clientControllerFindOne(requestParameters: ClientControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Client> {
+    async clientControllerFindOne(requestParameters: ClientControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientControllerCreate201Response> {
         const response = await this.clientControllerFindOneRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -201,7 +201,7 @@ export class ClientsApi extends runtime.BaseAPI {
     /**
      * Modifier un client
      */
-    async clientControllerUpdateRaw(requestParameters: ClientControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Client>> {
+    async clientControllerUpdateRaw(requestParameters: ClientControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientControllerCreate201Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -230,13 +230,13 @@ export class ClientsApi extends runtime.BaseAPI {
             body: UpdateClientDtoToJSON(requestParameters['updateClientDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => ClientFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ClientControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Modifier un client
      */
-    async clientControllerUpdate(requestParameters: ClientControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Client> {
+    async clientControllerUpdate(requestParameters: ClientControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientControllerCreate201Response> {
         const response = await this.clientControllerUpdateRaw(requestParameters, initOverrides);
         return await response.value();
     }

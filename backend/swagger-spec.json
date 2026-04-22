@@ -65,7 +65,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Client"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Client"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -115,7 +126,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedClientResponseDto"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PaginatedClientResponseDto"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -146,7 +168,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Client"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Client"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -185,7 +218,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Client"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Client"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -235,7 +279,25 @@
         },
         "responses": {
           "201": {
-            "description": ""
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Animal"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
           }
         },
         "summary": "Enregistrer un nouvel animal",
@@ -297,7 +359,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaginatedAnimalResponseDto"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/PaginatedAnimalResponseDto"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -328,7 +401,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Animal"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Animal"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -367,7 +451,18 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Animal"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Animal"
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -417,41 +512,34 @@
   "servers": [],
   "components": {
     "schemas": {
-      "CreateClientDto": {
+      "MetaDto": {
         "type": "object",
         "properties": {
-          "civility": {
-            "type": "string",
-            "enum": [
-              "M.",
-              "Mme",
-              "Mlle"
-            ],
-            "example": "M."
+          "timestamp": {
+            "type": "string"
           },
-          "firstName": {
-            "type": "string",
-            "example": "Jean"
-          },
-          "lastName": {
-            "type": "string",
-            "example": "Dupont"
-          },
-          "email": {
-            "type": "string",
-            "example": "jean.dupont@email.com"
-          },
-          "phone": {
-            "type": "string",
-            "example": "0612345678"
+          "path": {
+            "type": "string"
           }
         },
         "required": [
-          "civility",
-          "firstName",
-          "lastName",
-          "email",
-          "phone"
+          "timestamp",
+          "path"
+        ]
+      },
+      "ResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/MetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
         ]
       },
       "Client": {
@@ -617,6 +705,43 @@
           "pagination"
         ]
       },
+      "CreateClientDto": {
+        "type": "object",
+        "properties": {
+          "civility": {
+            "type": "string",
+            "enum": [
+              "M.",
+              "Mme",
+              "Mlle"
+            ],
+            "example": "M."
+          },
+          "firstName": {
+            "type": "string",
+            "example": "Jean"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Dupont"
+          },
+          "email": {
+            "type": "string",
+            "example": "jean.dupont@email.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "0612345678"
+          }
+        },
+        "required": [
+          "civility",
+          "firstName",
+          "lastName",
+          "email",
+          "phone"
+        ]
+      },
       "UpdateClientDto": {
         "type": "object",
         "properties": {
@@ -646,6 +771,24 @@
             "example": "0612345678"
           }
         }
+      },
+      "PaginatedAnimalResponseDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Animal"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMetaDto"
+          }
+        },
+        "required": [
+          "items",
+          "pagination"
+        ]
       },
       "CreateAnimalDto": {
         "type": "object",
@@ -688,24 +831,6 @@
           "weight",
           "species",
           "clientId"
-        ]
-      },
-      "PaginatedAnimalResponseDto": {
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Animal"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/PaginationMetaDto"
-          }
-        },
-        "required": [
-          "items",
-          "pagination"
         ]
       },
       "UpdateAnimalDto": {

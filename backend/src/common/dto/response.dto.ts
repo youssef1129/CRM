@@ -9,25 +9,34 @@ class MetaDto {
 }
 
 export class ResponseDto<T> {
-  data!: T;
-
   @ApiProperty()
+  data!: T | null;
+
+  @ApiProperty({ type: MetaDto })
+  meta!: MetaDto;
+}
+
+export class VoidResponseDto {
+  @ApiProperty({ nullable: true })
+  data!: null;
+
+  @ApiProperty({ type: MetaDto })
   meta!: MetaDto;
 }
 
 class PaginationMetaDto {
   @ApiProperty()
   totalItems!: number;
-  
+
   @ApiProperty()
   itemCount!: number;
-  
+
   @ApiProperty()
   itemsPerPage!: number;
-  
+
   @ApiProperty()
   totalPages!: number;
-  
+
   @ApiProperty()
   currentPage!: number;
 }

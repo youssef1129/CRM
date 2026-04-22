@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface Response<T> {
-  data: T;
+  data: T | null;
   meta: {
     timestamp: string;
     path: string;
@@ -29,7 +29,7 @@ export class TransformInterceptor<T> implements NestInterceptor<
     return next.handle().pipe(
       map(
         (data: T): Response<T> => ({
-          data,
+          data: data === undefined ? null : data,
           meta: {
             timestamp: new Date().toISOString(),
             path: request.url,

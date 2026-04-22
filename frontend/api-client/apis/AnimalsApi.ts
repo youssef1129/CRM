@@ -15,18 +15,18 @@
 
 import * as runtime from '../runtime';
 import type {
-  Animal,
+  AnimalControllerCreate201Response,
+  AnimalControllerFindAll200Response,
   CreateAnimalDto,
-  PaginatedAnimalResponseDto,
   UpdateAnimalDto,
 } from '../models/index';
 import {
-    AnimalFromJSON,
-    AnimalToJSON,
+    AnimalControllerCreate201ResponseFromJSON,
+    AnimalControllerCreate201ResponseToJSON,
+    AnimalControllerFindAll200ResponseFromJSON,
+    AnimalControllerFindAll200ResponseToJSON,
     CreateAnimalDtoFromJSON,
     CreateAnimalDtoToJSON,
-    PaginatedAnimalResponseDtoFromJSON,
-    PaginatedAnimalResponseDtoToJSON,
     UpdateAnimalDtoFromJSON,
     UpdateAnimalDtoToJSON,
 } from '../models/index';
@@ -63,7 +63,7 @@ export class AnimalsApi extends runtime.BaseAPI {
     /**
      * Enregistrer un nouvel animal
      */
-    async animalControllerCreateRaw(requestParameters: AnimalControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async animalControllerCreateRaw(requestParameters: AnimalControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AnimalControllerCreate201Response>> {
         if (requestParameters['createAnimalDto'] == null) {
             throw new runtime.RequiredError(
                 'createAnimalDto',
@@ -85,20 +85,21 @@ export class AnimalsApi extends runtime.BaseAPI {
             body: CreateAnimalDtoToJSON(requestParameters['createAnimalDto']),
         }, initOverrides);
 
-        return new runtime.VoidApiResponse(response);
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Enregistrer un nouvel animal
      */
-    async animalControllerCreate(requestParameters: AnimalControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.animalControllerCreateRaw(requestParameters, initOverrides);
+    async animalControllerCreate(requestParameters: AnimalControllerCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AnimalControllerCreate201Response> {
+        const response = await this.animalControllerCreateRaw(requestParameters, initOverrides);
+        return await response.value();
     }
 
     /**
      * Récupérer tous les animaux avec pagination et recherche
      */
-    async animalControllerFindAllRaw(requestParameters: AnimalControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PaginatedAnimalResponseDto>> {
+    async animalControllerFindAllRaw(requestParameters: AnimalControllerFindAllRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AnimalControllerFindAll200Response>> {
         const queryParameters: any = {};
 
         if (requestParameters['page'] != null) {
@@ -126,13 +127,13 @@ export class AnimalsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => PaginatedAnimalResponseDtoFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalControllerFindAll200ResponseFromJSON(jsonValue));
     }
 
     /**
      * Récupérer tous les animaux avec pagination et recherche
      */
-    async animalControllerFindAll(requestParameters: AnimalControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PaginatedAnimalResponseDto> {
+    async animalControllerFindAll(requestParameters: AnimalControllerFindAllRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AnimalControllerFindAll200Response> {
         const response = await this.animalControllerFindAllRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -140,7 +141,7 @@ export class AnimalsApi extends runtime.BaseAPI {
     /**
      * Récupérer un animal par son ID
      */
-    async animalControllerFindOneRaw(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Animal>> {
+    async animalControllerFindOneRaw(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AnimalControllerCreate201Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -159,13 +160,13 @@ export class AnimalsApi extends runtime.BaseAPI {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Récupérer un animal par son ID
      */
-    async animalControllerFindOne(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Animal> {
+    async animalControllerFindOne(requestParameters: AnimalControllerFindOneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AnimalControllerCreate201Response> {
         const response = await this.animalControllerFindOneRaw(requestParameters, initOverrides);
         return await response.value();
     }
@@ -205,7 +206,7 @@ export class AnimalsApi extends runtime.BaseAPI {
     /**
      * Modifier les informations d\'un animal
      */
-    async animalControllerUpdateRaw(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Animal>> {
+    async animalControllerUpdateRaw(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AnimalControllerCreate201Response>> {
         if (requestParameters['id'] == null) {
             throw new runtime.RequiredError(
                 'id',
@@ -234,13 +235,13 @@ export class AnimalsApi extends runtime.BaseAPI {
             body: UpdateAnimalDtoToJSON(requestParameters['updateAnimalDto']),
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => AnimalControllerCreate201ResponseFromJSON(jsonValue));
     }
 
     /**
      * Modifier les informations d\'un animal
      */
-    async animalControllerUpdate(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Animal> {
+    async animalControllerUpdate(requestParameters: AnimalControllerUpdateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AnimalControllerCreate201Response> {
         const response = await this.animalControllerUpdateRaw(requestParameters, initOverrides);
         return await response.value();
     }

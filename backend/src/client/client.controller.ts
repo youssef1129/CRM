@@ -19,18 +19,29 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiCreatedResponse,
+  ApiExtraModels,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { Client } from './entities/client.entity';
 import { PaginatedClientResponseDto } from './dto/client-response.dto';
+import { ResponseDto } from '../common/dto/response.dto';
 
 @ApiTags('clients')
+@ApiExtraModels(ResponseDto, Client, PaginatedClientResponseDto)
 @Controller('clients')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
   @Post()
   @ApiOperation({ summary: 'Créer un nouveau client' })
-  @ApiCreatedResponse({ type: Client })
+  @ApiCreatedResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Client) } } },
+      ],
+    },
+  })
   create(@Body() createClientDto: CreateClientDto) {
     return this.clientService.create(createClientDto);
   }
@@ -39,21 +50,46 @@ export class ClientController {
   @ApiOperation({
     summary: 'Récupérer tous les clients avec pagination et recherche',
   })
-  @ApiOkResponse({ type: PaginatedClientResponseDto })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(PaginatedClientResponseDto) },
+          },
+        },
+      ],
+    },
+  })
   findAll(@Query() query: PaginationQueryDto) {
     return this.clientService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un client par son ID' })
-  @ApiOkResponse({ type: Client })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Client) } } },
+      ],
+    },
+  })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.clientService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Modifier un client' })
-  @ApiOkResponse({ type: Client })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Client) } } },
+      ],
+    },
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateClientDto: UpdateClientDto,

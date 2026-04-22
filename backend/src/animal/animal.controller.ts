@@ -12,18 +12,35 @@ import {
 import { AnimalService } from './animal.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { UpdateAnimalDto } from './dto/update-animal.dto';
-import { ApiTags, ApiOperation, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { Animal } from './entities/animal.entity';
 import { PaginatedAnimalResponseDto } from './dto/animal-response.dto';
 import { AnimalPaginationQueryDto } from './dto/animal-pagination-query.dto';
+import { ResponseDto } from '../common/dto/response.dto';
 
 @ApiTags('animals')
+@ApiExtraModels(ResponseDto, Animal, PaginatedAnimalResponseDto)
 @Controller('animals')
 export class AnimalController {
   constructor(private readonly animalService: AnimalService) {}
 
   @Post()
   @ApiOperation({ summary: 'Enregistrer un nouvel animal' })
+  @ApiCreatedResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Animal) } } },
+      ],
+    },
+  })
   create(@Body() createAnimalDto: CreateAnimalDto) {
     return this.animalService.create(createAnimalDto);
   }
@@ -32,21 +49,46 @@ export class AnimalController {
   @ApiOperation({
     summary: 'Récupérer tous les animaux avec pagination et recherche',
   })
-  @ApiOkResponse({ type: PaginatedAnimalResponseDto })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        {
+          properties: {
+            data: { $ref: getSchemaPath(PaginatedAnimalResponseDto) },
+          },
+        },
+      ],
+    },
+  })
   findAll(@Query() query: AnimalPaginationQueryDto) {
     return this.animalService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer un animal par son ID' })
-  @ApiOkResponse({ type: Animal })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Animal) } } },
+      ],
+    },
+  })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.animalService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: "Modifier les informations d'un animal" })
-  @ApiOkResponse({ type: Animal })
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ResponseDto) },
+        { properties: { data: { $ref: getSchemaPath(Animal) } } },
+      ],
+    },
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAnimalDto: UpdateAnimalDto,
