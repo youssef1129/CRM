@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ClientService } from './client.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @ApiTags('clients')
 @Controller('clients')
@@ -25,9 +27,11 @@ export class ClientController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Récupérer tous les clients avec leurs animaux' })
-  findAll() {
-    return this.clientService.findAll();
+  @ApiOperation({
+    summary: 'Récupérer tous les clients avec pagination et recherche',
+  })
+  findAll(@Query() query: PaginationQueryDto) {
+    return this.clientService.findAll(query);
   }
 
   @Get(':id')

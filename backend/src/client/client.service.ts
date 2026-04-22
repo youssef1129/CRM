@@ -1,8 +1,9 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Client } from './entities/client.entity';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { CLIENT_REPOSITORY } from 'src/common/constants';
 
 @Injectable()
@@ -17,11 +18,36 @@ export class ClientService {
     return await this.clientRepository.save(client);
   }
 
-  async findAll(): Promise<Client[]> {
-    return await this.clientRepository.find({
+  async findAll(query: PaginationQueryDto) {
+    const { page = 1, limit = 10, search } = query;
+    const skip = (page - 1) * limit;
+
+    const where = search
+      ? [
+          { firstName: ILike(`%${search}%`) },
+          { lastName: ILike(`%${search}%`) },
+          { email: ILike(`%${search}%`) },
+        ]
+      : {};
+
+    const [items, total] = await this.clientRepository.findAndCount({
+      where,
       relations: ['animals'],
       order: { lastName: 'ASC' },
+      take: limit,
+      skip,
     });
+
+    return {
+      items,
+      pagination: {
+        totalItems: total,
+        itemCount: items.length,
+        itemsPerPage: limit,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+      },
+    };
   }
 
   async findOne(id: number): Promise<Client> {
