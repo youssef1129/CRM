@@ -1,0 +1,330 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/common/civilities": {
+      "get": {
+        "operationId": "CommonController_getCivilities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer la liste des civilités",
+        "tags": [
+          "common"
+        ]
+      }
+    },
+    "/common/species": {
+      "get": {
+        "operationId": "CommonController_getSpecies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer la liste des espèces d'animaux",
+        "tags": [
+          "common"
+        ]
+      }
+    },
+    "/clients": {
+      "post": {
+        "operationId": "ClientController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Créer un nouveau client",
+        "tags": [
+          "clients"
+        ]
+      },
+      "get": {
+        "operationId": "ClientController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer tous les clients avec pagination et recherche",
+        "tags": [
+          "clients"
+        ]
+      }
+    },
+    "/clients/{id}": {
+      "get": {
+        "operationId": "ClientController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer un client par son ID",
+        "tags": [
+          "clients"
+        ]
+      },
+      "patch": {
+        "operationId": "ClientController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateClientDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Modifier un client",
+        "tags": [
+          "clients"
+        ]
+      },
+      "delete": {
+        "operationId": "ClientController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Supprimer un client",
+        "tags": [
+          "clients"
+        ]
+      }
+    },
+    "/animals": {
+      "post": {
+        "operationId": "AnimalController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAnimalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Enregistrer un nouvel animal",
+        "tags": [
+          "animals"
+        ]
+      },
+      "get": {
+        "operationId": "AnimalController_findAll",
+        "parameters": [
+          {
+            "name": "species",
+            "required": false,
+            "in": "query",
+            "description": "Filtrer par espèce d'animal",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "chien",
+                "chat",
+                "hamster",
+                "tortue"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer tous les animaux avec pagination et recherche",
+        "tags": [
+          "animals"
+        ]
+      }
+    },
+    "/animals/{id}": {
+      "get": {
+        "operationId": "AnimalController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Récupérer un animal par son ID",
+        "tags": [
+          "animals"
+        ]
+      },
+      "patch": {
+        "operationId": "AnimalController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAnimalDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Modifier les informations d'un animal",
+        "tags": [
+          "animals"
+        ]
+      },
+      "delete": {
+        "operationId": "AnimalController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Supprimer un animal",
+        "tags": [
+          "animals"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "VET API",
+    "description": "CRM pour vétérinaires",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "vet",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "CreateClientDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateClientDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateAnimalDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateAnimalDto": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}
