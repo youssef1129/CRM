@@ -81,7 +81,7 @@ export default async function Page({
                 <FiCalendar className="text-teal-600 text-lg" />
               </div>
               <div>
-                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date d'inscription</span>
+                <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date d&apos;inscription</span>
                 <p className="text-slate-700 font-semibold">{new Date(client.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
               </div>
             </div>

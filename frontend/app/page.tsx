@@ -4,8 +4,8 @@ import { ClientCard } from '@/components/ClientCard';
 import { AddClientButton } from '@/components/AddClientButton';
 
 export default async function Home() {
-  const clientsResponse = await clientsApi.clientControllerFindAll({ limit: 8, page: 1, search: '' });
-  const animalsResponse = await animalsApi.animalControllerFindAll({ limit: 8, page: 1, search: '' });
+  const clientsResponse = await clientsApi.clientControllerFindAll({ limit: 5, page: 1, search: '' });
+  const animalsResponse = await animalsApi.animalControllerFindAll({ limit: 5, page: 1, search: '' });
 
   const clients = clientsResponse.data?.items ?? [];
   const animals = animalsResponse.data?.items ?? [];

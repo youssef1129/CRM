@@ -4,7 +4,7 @@ import { AnimalCard } from '@/components/AnimalCard';
 import { AddAnimalButton } from '@/components/AddAnimalButton';
 
 export default async function AnimalsPage() {
-    const response = await animalsApi.animalControllerFindAll({ limit: 10, page: 1, search: '' });
+    const response = await animalsApi.animalControllerFindAll({ limit: 5, page: 1, search: '' });
     const animals = response.data?.items ?? [];
     const totalAnimals = response.data?.pagination?.totalItems ?? animals.length;
 
@@ -32,7 +32,7 @@ export default async function AnimalsPage() {
                         <AddAnimalButton />
                     </div>
                 </div>
-                <CustomTable title="Patients" kind="animals" initialData={animals} initialTotal={totalAnimals} pageSize={6} />
+                <CustomTable title="Patients" kind="animals" initialData={animals} initialTotal={totalAnimals} pageSize={5} />
             </div>
         </div>
     );

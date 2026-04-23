@@ -27,8 +27,8 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           <FaUser className="text-white text-sm" />
         </div>
         <div className="text-right">
-          <p className="text-sm font-medium text-gray-900">Dr. Sarah Mitchell</p>
-          <p className="text-xs text-gray-500">Paramètres du profil</p>
+          <p className="text-sm font-medium text-gray-900 mb-1!">Dr. Sarah Mitchell</p>
+          <p className="text-xs text-gray-500 mb-1!">Paramètres du profil</p>
         </div>
       </div>
     </div>

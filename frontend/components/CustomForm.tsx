@@ -3,21 +3,32 @@
 import { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message, InputNumber } from 'antd';
 import { clientsApi, animalsApi } from '@/config/api';
-import { AnimalSpeciesEnum, ClientCivilityEnum } from '@/api-client';
+import { 
+    AnimalSpeciesEnum, 
+    ClientCivilityEnum, 
+    type Client, 
+    type Animal,
+    type CreateClientDto,
+    type UpdateClientDto,
+    type CreateAnimalDto,
+    type UpdateAnimalDto
+} from '@/api-client';
 import { FiUser, FiMail, FiPhone, FiHash, FiSave, FiPlusCircle } from 'react-icons/fi';
 import { FaWeight, FaArrowsAltV, FaPaw } from 'react-icons/fa';
+
+type FormData = CreateClientDto | UpdateClientDto | CreateAnimalDto | UpdateAnimalDto;
 
 interface CustomFormProps {
     kind: 'clients' | 'animals';
     mode: 'add' | 'update';
-    initialData?: any;
-    onSuccess?: (() => void) | undefined;
+    initialData?: Client | Animal;
+    onSuccess?: () => void;
 }
 
 export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormProps) => {
-    const [form] = Form.useForm();
+    const [form] = Form.useForm<FormData>();
     const [loading, setLoading] = useState(false);
-    const [clients, setClients] = useState<any[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
 
     const fetchClients = async () => {
         try {
@@ -33,29 +44,28 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
             form.setFieldsValue(initialData);
         }
 
-        // Fetch clients for animal form
         if (kind === 'animals') {
             fetchClients();
         }
     }, [mode, initialData, form, kind]);
 
-    const handleSubmit = async (values: any) => {
+    const handleSubmit = async (values: FormData) => {
         setLoading(true);
         try {
             if (kind === 'clients') {
                 if (mode === 'add') {
-                    await clientsApi.clientControllerCreate({ createClientDto: values });
+                    await clientsApi.clientControllerCreate({ createClientDto: values as CreateClientDto });
                     message.success('Client ajouté avec succès');
-                } else {
-                    await clientsApi.clientControllerUpdate({ id: initialData.id, updateClientDto: values });
+                } else if (initialData) {
+                    await clientsApi.clientControllerUpdate({ id: initialData.id, updateClientDto: values as UpdateClientDto });
                     message.success('Client mis à jour avec succès');
                 }
             } else {
                 if (mode === 'add') {
-                    await animalsApi.animalControllerCreate({ createAnimalDto: values });
+                    await animalsApi.animalControllerCreate({ createAnimalDto: values as CreateAnimalDto });
                     message.success('Animal ajouté avec succès');
-                } else {
-                    await animalsApi.animalControllerUpdate({ id: initialData.id, updateAnimalDto: values });
+                } else if (initialData) {
+                    await animalsApi.animalControllerUpdate({ id: initialData.id, updateAnimalDto: values as UpdateAnimalDto });
                     message.success('Animal mis à jour avec succès');
                 }
             }
