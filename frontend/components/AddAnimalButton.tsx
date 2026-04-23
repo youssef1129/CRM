@@ -10,7 +10,7 @@ export const AddAnimalButton = () => {
 
   const handleSuccess = () => {
     setIsModalOpen(false);
-    window.location.reload();
+    window.dispatchEvent(new CustomEvent('refetch-data', { detail: { kind: 'animals' } }));
   };
 
   return (

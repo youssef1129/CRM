@@ -59,8 +59,18 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
         };
 
         fetchData();
+
+        const handleRefetch = (e: any) => {
+            if (e.detail?.kind === kind || !e.detail?.kind) {
+                fetchData();
+            }
+        };
+
+        window.addEventListener('refetch-data', handleRefetch);
+
         return () => {
             active = false;
+            window.removeEventListener('refetch-data', handleRefetch);
         };
     }, [kind, page, pageSizeState, query]);
 

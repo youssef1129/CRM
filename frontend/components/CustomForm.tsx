@@ -16,6 +16,7 @@ import {
 import { FiUser, FiMail, FiPhone, FiHash, FiSave, FiPlusCircle } from 'react-icons/fi';
 import { FaWeight, FaArrowsAltV, FaPaw } from 'react-icons/fa';
 import { handleApiError } from '@/lib/error-handler';
+import { useRouter } from 'next/navigation';
 
 type FormData = CreateClientDto | UpdateClientDto | CreateAnimalDto | UpdateAnimalDto;
 
@@ -26,10 +27,15 @@ interface CustomFormProps {
     onSuccess?: () => void;
 }
 
+const Label = ({ children }: { children: React.ReactNode }) => (
+    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">{children}</span>
+);
+
 export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormProps) => {
     const [form] = Form.useForm<FormData>();
     const [loading, setLoading] = useState(false);
     const [clients, setClients] = useState<Client[]>([]);
+    const router = useRouter();
 
     const fetchClients = async () => {
         try {
@@ -42,7 +48,7 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
 
     useEffect(() => {
         if (mode === 'update' && initialData) {
-            form.setFieldsValue(initialData);
+            form.setFieldsValue(initialData as any);
         }
 
         if (kind === 'animals') {
@@ -70,11 +76,10 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                     message.success('Animal mis à jour avec succès');
                 }
             }
-            // Call onSuccess if provided, otherwise reload for update mode
             if (onSuccess) {
                 onSuccess();
             } else if (mode === 'update') {
-                window.location.reload();
+                router.refresh();
             }
         } catch (error) {
             console.error('Erreur lors de la soumission', error);
@@ -90,8 +95,11 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
 
     const clientFields = (
         <div className="space-y-4">
-            <Form.Item label="Civilité" name="civility" rules={[{ required: true, message: 'Civilité requise' }]}>
-                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Civilité</span>
+            <Form.Item 
+                name="civility" 
+                rules={[{ required: true, message: 'Civilité requise' }]}
+                label={<Label>Civilité</Label>}
+            >
                 <Select
                     placeholder="Choisir une civilité"
                     options={Object.values(ClientCivilityEnum).map((value) => ({ label: value, value }))}
@@ -99,21 +107,32 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 />
             </Form.Item>
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Prénom</span>
+                <Form.Item 
+                    name="firstName" 
+                    rules={[{ required: true, message: 'Prénom requis' }]}
+                    label={<Label>Prénom</Label>}
+                >
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Jean" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item name="lastName" rules={[{ required: true, message: 'Nom requis' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Nom</span>
+                <Form.Item 
+                    name="lastName" 
+                    rules={[{ required: true, message: 'Nom requis' }]}
+                    label={<Label>Nom</Label>}
+                >
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Dupont" className="h-10 rounded-xl" />
                 </Form.Item>
             </div>
-            <Form.Item name="email" rules={[{ required: true, type: 'email', message: 'Email invalide' }]}>
-                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Email</span>
+            <Form.Item 
+                name="email" 
+                rules={[{ required: true, type: 'email', message: 'Email invalide' }]}
+                label={<Label>Email</Label>}
+            >
                 <Input prefix={<FiMail className="text-slate-400" />} placeholder="jean.dupont@email.com" className="h-10 rounded-xl" />
             </Form.Item>
-            <Form.Item name="phone">
-                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Téléphone</span>
+            <Form.Item 
+                name="phone"
+                label={<Label>Téléphone</Label>}
+            >
                 <Input prefix={<FiPhone className="text-slate-400" />} placeholder="06 12 34 56 78" className="h-10 rounded-xl" />
             </Form.Item>
         </div>
@@ -122,12 +141,18 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
     const animalFields = (
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Nom du patient</span>
+                <Form.Item 
+                    name="firstName" 
+                    rules={[{ required: true, message: 'Prénom requis' }]}
+                    label={<Label>Nom du patient</Label>}
+                >
                     <Input prefix={<FaPaw className="text-slate-400" />} placeholder="Médor" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item name="species" rules={[{ required: true, message: 'Espèce requise' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Espèce</span>
+                <Form.Item 
+                    name="species" 
+                    rules={[{ required: true, message: 'Espèce requise' }]}
+                    label={<Label>Espèce</Label>}
+                >
                     <Select
                         placeholder="Espèce"
                         options={Object.values(AnimalSpeciesEnum).map((value) => ({ label: value, value }))}
@@ -136,21 +161,33 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 </Form.Item>
             </div>
             <div className="grid grid-cols-3 gap-4">
-                <Form.Item name="age" rules={[{ required: true, message: 'Âge requis' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Âge (ans)</span>
+                <Form.Item 
+                    name="age" 
+                    rules={[{ required: true, message: 'Âge requis' }]}
+                    label={<Label>Âge (ans)</Label>}
+                >
                     <InputNumber min={0} className="w-full h-10 rounded-xl flex items-center" prefix={<FiHash className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item name="weight" rules={[{ required: true, message: 'Poids requis' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Poids (kg)</span>
+                <Form.Item 
+                    name="weight" 
+                    rules={[{ required: true, message: 'Poids requis' }]}
+                    label={<Label>Poids (kg)</Label>}
+                >
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaWeight className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item name="height" rules={[{ required: true, message: 'Taille requise' }]}>
-                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Taille (cm)</span>
+                <Form.Item 
+                    name="height" 
+                    rules={[{ required: true, message: 'Taille requise' }]}
+                    label={<Label>Taille (cm)</Label>}
+                >
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaArrowsAltV className="text-slate-400" />} />
                 </Form.Item>
             </div>
-            <Form.Item name="clientId" rules={[{ required: true, message: 'Propriétaire requis' }]}>
-                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Propriétaire</span>
+            <Form.Item 
+                name="clientId" 
+                rules={[{ required: true, message: 'Propriétaire requis' }]}
+                label={<Label>Propriétaire</Label>}
+            >
                 <Select
                     placeholder="Sélectionner le propriétaire"
                     prefix={<FiUser className="text-slate-400 mr-2" />}
