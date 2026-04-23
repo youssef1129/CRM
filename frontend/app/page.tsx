@@ -1,53 +1,62 @@
-'use client';
+import Link from 'next/link';
+import { clientsApi, animalsApi } from '@/config/api';
+import { CustomTable } from '@/components/CustomTable';
+import { ClientCard } from '@/components/ClientCard';
 
-import { useState, useEffect } from 'react';
-import { clientsApi } from "@/config/api";
+export default async function Home() {
+  const clientsResponse = await clientsApi.clientControllerFindAll({ limit: 8, page: 1, search: '' });
+  const animalsResponse = await animalsApi.animalControllerFindAll({ limit: 8, page: 1, search: '' });
 
-export default function Home() {
-  const [clients, setClients] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const getClients = async () => {
-      try {
-        const response = await clientsApi.clientControllerFindAll({ limit: 5, page: 1, search: '' });
-        setClients(response);
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    getClients();
-  }, []);
-
-  if (loading) {
-    return <div className="text-center py-10">Chargement...</div>;
-  }
+  const clients = clientsResponse.data?.items ?? [];
+  const animals = animalsResponse.data?.items ?? [];
+  const totalClients = clientsResponse.data?.pagination?.totalItems ?? clients.length;
+  const totalAnimals = animalsResponse.data?.pagination?.totalItems ?? animals.length;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-4">Clients Récents</h2>
-        {clients?.data?.items ? (
-          <div className="space-y-2">
-            {clients.data.items.map((client: any) => (
-              <div key={client.id} className="flex justify-between items-center p-3 bg-gray-50 rounded">
-                <div>
-                  <p className="font-medium">{client.firstName} {client.lastName}</p>
-                  <p className="text-sm text-gray-600">{client.email}</p>
-                </div>
-                <span className="text-sm text-gray-500">
-                  {new Date(client.createdAt).toLocaleDateString('fr-FR')}
-                </span>
-              </div>
-            ))}
+    <div className="space-y-8 mt-2">
+      <section className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Clinique</p>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">VetCRM</h2>
+          <p className="mt-2 text-sm text-slate-600">Tableau de bord principal pour votre pratique.</p>
+        </div>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Clients enregistrés</p>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">{totalClients}</h2>
+          <p className="mt-2 text-sm text-slate-600">Dernières fiches propriétaires enregistrées.</p>
+        </div>
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-500">Animaux suivis</p>
+          <h2 className="mt-4 text-3xl font-semibold text-slate-900">{totalAnimals}</h2>
+          <p className="mt-2 text-sm text-slate-600">Patients actifs dans la clinique.</p>
+        </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-3">
+        {clients.slice(0, 3).map((client) => (
+          <ClientCard key={client.id} client={client} />
+        ))}
+      </section>
+
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">Clients récents</h2>
+            <p className="mt-2 text-sm text-slate-600">Suivez les prochains rendez-vous et les dossiers patients.</p>
           </div>
-        ) : (
-          <p>Aucun client trouvé.</p>
-        )}
-      </div>
+          <Link href="/animals" className="inline-flex items-center rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700">
+            Accéder aux animaux
+          </Link>
+        </div>
+
+        <CustomTable
+          title="Table clients"
+          kind="clients"
+          data={clients}
+          total={totalClients}
+          pageSize={5}
+        />
+      </section>
     </div>
   );
 }
