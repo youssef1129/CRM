@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { Form, Input, Select, Button, message, InputNumber } from 'antd';
 import { clientsApi, animalsApi } from '@/config/api';
-import { 
-    AnimalSpeciesEnum, 
-    ClientCivilityEnum, 
-    type Client, 
+import {
+    AnimalSpeciesEnum,
+    ClientCivilityEnum,
+    type Client,
     type Animal,
     type CreateClientDto,
     type UpdateClientDto,
@@ -55,11 +55,19 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
             fetchClients();
         }
     }, [mode, initialData, form, kind]);
-
     const handleSubmit = async (values: FormData) => {
         setLoading(true);
         try {
+            // Ensure numeric values are actually numbers (sometimes AntD or API might pass them as strings)
+            if (kind === 'animals') {
+                const animalValues = values as any;
+                if (animalValues.age !== undefined) animalValues.age = Number(animalValues.age);
+                if (animalValues.weight !== undefined) animalValues.weight = Number(animalValues.weight);
+                if (animalValues.height !== undefined) animalValues.height = Number(animalValues.height);
+            }
+
             if (kind === 'clients') {
+
                 if (mode === 'add') {
                     await clientsApi.clientControllerCreate({ createClientDto: values as CreateClientDto });
                     message.success('Client ajouté avec succès');
@@ -95,8 +103,8 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
 
     const clientFields = (
         <div className="space-y-4">
-            <Form.Item 
-                name="civility" 
+            <Form.Item
+                name="civility"
                 rules={[{ required: true, message: 'Civilité requise' }]}
                 label={<Label>Civilité</Label>}
             >
@@ -107,29 +115,29 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 />
             </Form.Item>
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item 
-                    name="firstName" 
+                <Form.Item
+                    name="firstName"
                     rules={[{ required: true, message: 'Prénom requis' }]}
                     label={<Label>Prénom</Label>}
                 >
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Jean" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item 
-                    name="lastName" 
+                <Form.Item
+                    name="lastName"
                     rules={[{ required: true, message: 'Nom requis' }]}
                     label={<Label>Nom</Label>}
                 >
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Dupont" className="h-10 rounded-xl" />
                 </Form.Item>
             </div>
-            <Form.Item 
-                name="email" 
+            <Form.Item
+                name="email"
                 rules={[{ required: true, type: 'email', message: 'Email invalide' }]}
                 label={<Label>Email</Label>}
             >
                 <Input prefix={<FiMail className="text-slate-400" />} placeholder="jean.dupont@email.com" className="h-10 rounded-xl" />
             </Form.Item>
-            <Form.Item 
+            <Form.Item
                 name="phone"
                 label={<Label>Téléphone</Label>}
             >
@@ -141,15 +149,15 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
     const animalFields = (
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item 
-                    name="firstName" 
+                <Form.Item
+                    name="firstName"
                     rules={[{ required: true, message: 'Prénom requis' }]}
                     label={<Label>Nom du patient</Label>}
                 >
                     <Input prefix={<FaPaw className="text-slate-400" />} placeholder="Médor" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item 
-                    name="species" 
+                <Form.Item
+                    name="species"
                     rules={[{ required: true, message: 'Espèce requise' }]}
                     label={<Label>Espèce</Label>}
                 >
@@ -161,30 +169,30 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 </Form.Item>
             </div>
             <div className="grid grid-cols-3 gap-4">
-                <Form.Item 
-                    name="age" 
+                <Form.Item
+                    name="age"
                     rules={[{ required: true, message: 'Âge requis' }]}
                     label={<Label>Âge (ans)</Label>}
                 >
                     <InputNumber min={0} className="w-full h-10 rounded-xl flex items-center" prefix={<FiHash className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item 
-                    name="weight" 
+                <Form.Item
+                    name="weight"
                     rules={[{ required: true, message: 'Poids requis' }]}
                     label={<Label>Poids (kg)</Label>}
                 >
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaWeight className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item 
-                    name="height" 
+                <Form.Item
+                    name="height"
                     rules={[{ required: true, message: 'Taille requise' }]}
                     label={<Label>Taille (cm)</Label>}
                 >
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaArrowsAltV className="text-slate-400" />} />
                 </Form.Item>
             </div>
-            <Form.Item 
-                name="clientId" 
+            <Form.Item
+                name="clientId"
                 rules={[{ required: true, message: 'Propriétaire requis' }]}
                 label={<Label>Propriétaire</Label>}
             >
