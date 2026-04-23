@@ -52,8 +52,8 @@ export default async function Home() {
         <CustomTable
           title="Table clients"
           kind="clients"
-          data={clients}
-          total={totalClients}
+          initialData={clients}
+          initialTotal={totalClients}
           pageSize={5}
         />
       </section>

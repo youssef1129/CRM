@@ -32,7 +32,7 @@ export default async function AnimalsPage() {
             <p className="mt-2 text-sm text-slate-600">Suivez les profils et les propriétaires enregistrés.</p>
           </div>
         </div>
-        <CustomTable title="Patients" kind="animals" data={animals} total={totalAnimals} pageSize={6} />
+        <CustomTable title="Patients" kind="animals" initialData={animals} initialTotal={totalAnimals} pageSize={6} />
       </div>
     </div>
   );
