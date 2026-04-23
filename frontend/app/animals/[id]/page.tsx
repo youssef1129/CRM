@@ -6,6 +6,8 @@ import { AnimalImageHeader } from '@/components/AnimalImageHeader';
 import { FiArrowLeft, FiInfo, FiHash, FiClock, FiActivity, FiUser } from 'react-icons/fi';
 import { FaWeight, FaArrowsAltV, FaDna } from 'react-icons/fa';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page({
   params,
 }: {

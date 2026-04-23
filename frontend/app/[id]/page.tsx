@@ -6,6 +6,8 @@ import { AnimalCard } from '@/components/AnimalCard';
 import { FiMail, FiPhone, FiCalendar, FiArrowLeft, FiInfo, FiLayers } from 'react-icons/fi';
 import { FaUserCircle } from 'react-icons/fa';
 
+export const dynamic = 'force-dynamic';
+
 export default async function Page({
   params,
 }: {

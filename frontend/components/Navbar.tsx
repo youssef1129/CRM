@@ -17,16 +17,7 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuClick }) => {
           <FaBars className="text-xl" />
         </button>
         
-        <div className="hidden lg:flex relative w-full max-w-xs group">
-          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <FaSearch className="text-slate-400 group-focus-within:text-teal-600 transition-colors" />
-          </div>
-          <input 
-            type="text" 
-            placeholder="Recherche rapide..." 
-            className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl text-sm focus:ring-2 focus:ring-teal-500/20 focus:bg-white transition-all outline-none"
-          />
-        </div>
+        
       </div>
 
       {/* User Avatar */}

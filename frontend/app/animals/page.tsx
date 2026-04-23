@@ -3,6 +3,8 @@ import { CustomTable } from '@/components/CustomTable';
 import { AnimalCard } from '@/components/AnimalCard';
 import { AddAnimalButton } from '@/components/AddAnimalButton';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AnimalsPage() {
     const response = await animalsApi.animalControllerFindAll({ limit: 5, page: 1, search: '' });
     const animals = response.data?.items ?? [];
