@@ -1,7 +1,7 @@
-import Link from 'next/link';
 import { clientsApi, animalsApi } from '@/config/api';
 import { CustomTable } from '@/components/CustomTable';
 import { ClientCard } from '@/components/ClientCard';
+import { AddClientButton } from '@/components/AddClientButton';
 
 export default async function Home() {
   const clientsResponse = await clientsApi.clientControllerFindAll({ limit: 8, page: 1, search: '' });
@@ -41,12 +41,12 @@ export default async function Home() {
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Clients récents</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">Clients</h2>
             <p className="mt-2 text-sm text-slate-600">Suivez les prochains rendez-vous et les dossiers patients.</p>
           </div>
-          <Link href="/animals" className="inline-flex items-center rounded-full bg-teal-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-teal-700">
-            Accéder aux animaux
-          </Link>
+          <div className="flex gap-2">
+            <AddClientButton />
+          </div>
         </div>
 
         <CustomTable

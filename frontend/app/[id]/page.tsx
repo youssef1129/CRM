@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { clientsApi } from '@/config/api';
+import { CustomForm } from '@/components/CustomForm';
+import { DeleteClientButton } from '@/components/DeleteClientButton';
 
 export default async function Page({
   params,
@@ -19,9 +21,12 @@ export default async function Page({
         <div className='mt-5'>
           <h1 className="text-3xl font-semibold text-slate-900">{client.civility} {client.firstName} {client.lastName}</h1>
         </div>
-        <Link href="/" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
-          Retour au tableau de bord
-        </Link>
+        <div className="flex gap-2">
+          <DeleteClientButton clientId={client.id} />
+          <Link href="/" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+            Retour au tableau de bord
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -48,24 +53,35 @@ export default async function Page({
         </div>
 
         <div className="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Animaux associés</h2>
-          <div className="mt-4 space-y-3">
-            {client.animals?.length ? (
-              client.animals.map((animal) => (
-                <div key={animal.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="text-base font-semibold text-slate-900">{animal.firstName}</p>
-                      <p className="text-sm text-slate-600">{animal.species}</p>
-                    </div>
-                    <p className="text-sm text-slate-500">{animal.age} ans • {animal.weight} kg</p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-slate-600">Aucun animal associé pour ce propriétaire.</p>
-            )}
+          <h2 className="text-lg font-semibold text-slate-900">Modifier le client</h2>
+          <div className="mt-4">
+            <CustomForm
+              kind="clients"
+              mode="update"
+              initialData={client}
+            />
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">Animaux associés</h2>
+        <div className="mt-4 space-y-3">
+          {client.animals?.length ? (
+            client.animals.map((animal) => (
+              <div key={animal.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-base font-semibold text-slate-900">{animal.firstName}</p>
+                    <p className="text-sm text-slate-600">{animal.species}</p>
+                  </div>
+                  <p className="text-sm text-slate-500">{animal.age} ans • {animal.weight} kg</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-slate-600">Aucun animal associé pour ce propriétaire.</p>
+          )}
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
 'use client';
 
 import { useMemo, useState, useEffect } from 'react';
-import { Table, Dropdown, Button, Space, Tag, Modal, Form, Input, Select, Pagination } from 'antd';
-import { EllipsisOutlined, SearchOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/navigation';
+import { Table, Button, Tag, Input, Select, Pagination } from 'antd';
+import { EyeOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType, ColumnType } from 'antd/es/table';
 import { clientsApi, animalsApi } from '@/config/api';
 
@@ -15,6 +16,7 @@ interface CustomTableProps<T extends object> {
 }
 
 export const CustomTable = <T extends object>({ title, kind = 'clients', initialData, initialTotal, pageSize = 5 }: CustomTableProps<T>) => {
+    const router = useRouter();
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
     const [query, setQuery] = useState('');
@@ -22,9 +24,6 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
     const [data, setData] = useState<T[]>(initialData);
     const [total, setTotal] = useState(initialTotal);
     const [loading, setLoading] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedRecord, setSelectedRecord] = useState<T | null>(null);
-    const [form] = Form.useForm();
 
     useEffect(() => {
         const timer = window.setTimeout(() => {
@@ -153,20 +152,14 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
         ] as ColumnsType<T>;
     }, [kind]);
 
-    const showRecordModal = (record: T) => {
+    const handleViewDetails = (record: T) => {
         const item = record as Record<string, unknown>;
-        setSelectedRecord(record);
-        form.setFieldsValue({
-            nom: String(item['firstName'] ?? ''),
-            email: String(item['email'] ?? ''),
-            type: String(item['species'] ?? 'client'),
-        });
-        setIsModalOpen(true);
-    };
-
-    const handleMenuClick = (key: string, record: T) => {
-        if (key === 'view') {
-            showRecordModal(record);
+        const id = String(item['id'] ?? '');
+        
+        if (kind === 'clients') {
+            router.push(`/${id}`);
+        } else {
+            router.push(`/animals/${id}`);
         }
     };
 
@@ -174,18 +167,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
         title: 'Actions',
         key: 'actions',
         render: (_: unknown, record: T) => (
-            <Dropdown
-                menu={{
-                    items: [
-                        { key: 'view', label: 'Voir le détail' },
-                        { key: 'edit', label: 'Modifier' },
-                    ],
-                    onClick: ({ key }) => handleMenuClick(key as string, record),
-                }}
-                trigger={['click']}
-            >
-                <Button type="text" icon={<EllipsisOutlined />} />
-            </Dropdown>
+            <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetails(record)} />
         ),
     };
 
@@ -196,7 +178,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
                     <h3 className="text-xl font-semibold text-slate-900">{title}</h3>
                     <p className="text-sm text-slate-500">{visibleData.length} éléments disponibles.</p>
                 </div>
-                <Space className="w-full sm:w-auto">
+                <div className="flex gap-2 w-full sm:w-auto">
                     <Input
                         prefix={<SearchOutlined />}
                         placeholder="Rechercher..."
@@ -205,7 +187,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
                         style={{ minWidth: 220 }}
                     />
                     <Select value={pageSizeState} options={[{ label: '5 par page', value: 5 }, { label: '10 par page', value: 10 }, { label: '20 par page', value: 20 }]} onChange={(value) => { setPageSizeState(Number(value)); setPage(1); }} />
-                </Space>
+                </div>
             </div>
 
             <Table
@@ -218,7 +200,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
             />
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="space-x-2">
+                <div className="flex gap-2">
                     <Tag color="cyan">Total : {total}</Tag>
                     <Tag color="green">Affichés : {pageData.length}</Tag>
                 </div>
@@ -230,41 +212,6 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
                     showSizeChanger={false}
                 />
             </div>
-
-            <Modal
-                open={isModalOpen}
-                title={
-                    selectedRecord && (selectedRecord as Record<string, unknown>)['firstName']
-                        ? String((selectedRecord as Record<string, unknown>)['firstName'])
-                        : 'Aperçu rapide'
-                }
-                onCancel={() => setIsModalOpen(false)}
-                footer={null}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={() => {
-                        setIsModalOpen(false);
-                    }}
-                >
-                    <Form.Item label="Nom" name="nom">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Email" name="email">
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label="Type" name="type">
-                        <Select options={[{ label: 'Client', value: 'client' }, { label: 'Animal', value: 'animal' }]} />
-                    </Form.Item>
-                    <div className="flex justify-end gap-2">
-                        <Button onClick={() => setIsModalOpen(false)}>Fermer</Button>
-                        <Button type="primary" htmlType="submit">
-                            Enregistrer
-                        </Button>
-                    </div>
-                </Form>
-            </Modal>
         </div>
     );
 };

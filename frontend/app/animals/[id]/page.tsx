@@ -1,5 +1,7 @@
 import Link from 'next/link';
 import { animalsApi } from '@/config/api';
+import { CustomForm } from '@/components/CustomForm';
+import { DeleteAnimalButton } from '@/components/DeleteAnimalButton';
 
 export default async function Page({
   params,
@@ -20,9 +22,12 @@ export default async function Page({
           <h1 className="text-3xl font-semibold text-slate-900">{animal.firstName}</h1>
           <p className="mt-2 text-sm text-slate-600">Propriétaire : {animal.client?.firstName} {animal.client?.lastName}</p>
         </div>
-        <Link href="/animals" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
-          Retour à la liste
-        </Link>
+        <div className="flex gap-2">
+          <DeleteAnimalButton animalId={animal.id} />
+          <Link href="/animals" className="inline-flex items-center rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-200">
+            Retour à la liste
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -49,12 +54,23 @@ export default async function Page({
         </div>
 
         <div className="lg:col-span-2 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Suivi du dossier</h2>
-          <div className="mt-4 space-y-3 text-sm text-slate-600">
-            <p>Ce patient a été créé le {new Date(animal.createdAt).toLocaleDateString('fr-FR')}.</p>
-            <p>Dernière mise à jour : {new Date(animal.updatedAt).toLocaleDateString('fr-FR')}.</p>
-            <p>Identifiant de propriétaire : {animal.clientId}</p>
+          <h2 className="text-lg font-semibold text-slate-900">Modifier l'animal</h2>
+          <div className="mt-4">
+            <CustomForm
+              kind="animals"
+              mode="update"
+              initialData={animal}
+            />
           </div>
+        </div>
+      </div>
+
+      <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">Suivi du dossier</h2>
+        <div className="mt-4 space-y-3 text-sm text-slate-600">
+          <p>Ce patient a été créé le {new Date(animal.createdAt).toLocaleDateString('fr-FR')}.</p>
+          <p>Dernière mise à jour : {new Date(animal.updatedAt).toLocaleDateString('fr-FR')}.</p>
+          <p>Identifiant de propriétaire : {animal.clientId}</p>
         </div>
       </div>
     </div>
