@@ -42,7 +42,7 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
 
     useEffect(() => {
         if (mode === 'update' && initialData) {
-            form.setFieldsValue(initialData as any);
+            form.setFieldsValue(initialData);
         }
 
         if (kind === 'animals') {

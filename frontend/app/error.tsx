@@ -22,9 +22,9 @@ export default function Error({
         <FiAlertTriangle className="text-8xl text-red-500" />
       </div>
       
-      <h1 className="text-3xl font-black text-slate-900">Oups ! Quelque chose s'est mal passé</h1>
+      <h1 className="text-3xl font-black text-slate-900">Oups ! Quelque chose s&apos;est mal passé</h1>
       <p className="mt-4 max-w-md text-slate-500 font-medium">
-        Une erreur s'est produite lors du chargement de cette page. 
+        Une erreur s&apos;est produite lors du chargement de cette page. 
         Nos équipes ont été informées.
       </p>
       
