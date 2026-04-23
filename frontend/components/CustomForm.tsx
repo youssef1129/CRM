@@ -15,6 +15,7 @@ import {
 } from '@/api-client';
 import { FiUser, FiMail, FiPhone, FiHash, FiSave, FiPlusCircle } from 'react-icons/fi';
 import { FaWeight, FaArrowsAltV, FaPaw } from 'react-icons/fa';
+import { handleApiError } from '@/lib/error-handler';
 
 type FormData = CreateClientDto | UpdateClientDto | CreateAnimalDto | UpdateAnimalDto;
 
@@ -41,7 +42,7 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
 
     useEffect(() => {
         if (mode === 'update' && initialData) {
-            form.setFieldsValue(initialData);
+            form.setFieldsValue(initialData as any);
         }
 
         if (kind === 'animals') {
@@ -77,7 +78,11 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
             }
         } catch (error) {
             console.error('Erreur lors de la soumission', error);
-            message.error('Erreur lors de la soumission du formulaire');
+            const apiError = await handleApiError(error);
+            message.error(apiError.message);
+            if (apiError.details) {
+                apiError.details.forEach(detail => message.warning(detail));
+            }
         } finally {
             setLoading(false);
         }
@@ -86,6 +91,7 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
     const clientFields = (
         <div className="space-y-4">
             <Form.Item label="Civilité" name="civility" rules={[{ required: true, message: 'Civilité requise' }]}>
+                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Civilité</span>
                 <Select
                     placeholder="Choisir une civilité"
                     options={Object.values(ClientCivilityEnum).map((value) => ({ label: value, value }))}
@@ -93,17 +99,21 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 />
             </Form.Item>
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item label="Prénom" name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
+                <Form.Item name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Prénom</span>
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Jean" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item label="Nom" name="lastName" rules={[{ required: true, message: 'Nom requis' }]}>
+                <Form.Item name="lastName" rules={[{ required: true, message: 'Nom requis' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Nom</span>
                     <Input prefix={<FiUser className="text-slate-400" />} placeholder="Dupont" className="h-10 rounded-xl" />
                 </Form.Item>
             </div>
-            <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email', message: 'Email invalide' }]}>
+            <Form.Item name="email" rules={[{ required: true, type: 'email', message: 'Email invalide' }]}>
+                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Email</span>
                 <Input prefix={<FiMail className="text-slate-400" />} placeholder="jean.dupont@email.com" className="h-10 rounded-xl" />
             </Form.Item>
-            <Form.Item label="Téléphone" name="phone">
+            <Form.Item name="phone">
+                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Téléphone</span>
                 <Input prefix={<FiPhone className="text-slate-400" />} placeholder="06 12 34 56 78" className="h-10 rounded-xl" />
             </Form.Item>
         </div>
@@ -112,10 +122,12 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
     const animalFields = (
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-                <Form.Item label="Nom du patient" name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
+                <Form.Item name="firstName" rules={[{ required: true, message: 'Prénom requis' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Nom du patient</span>
                     <Input prefix={<FaPaw className="text-slate-400" />} placeholder="Médor" className="h-10 rounded-xl" />
                 </Form.Item>
-                <Form.Item label="Espèce" name="species" rules={[{ required: true, message: 'Espèce requise' }]}>
+                <Form.Item name="species" rules={[{ required: true, message: 'Espèce requise' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Espèce</span>
                     <Select
                         placeholder="Espèce"
                         options={Object.values(AnimalSpeciesEnum).map((value) => ({ label: value, value }))}
@@ -124,17 +136,21 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
                 </Form.Item>
             </div>
             <div className="grid grid-cols-3 gap-4">
-                <Form.Item label="Âge (ans)" name="age" rules={[{ required: true, message: 'Âge requis' }]}>
+                <Form.Item name="age" rules={[{ required: true, message: 'Âge requis' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Âge (ans)</span>
                     <InputNumber min={0} className="w-full h-10 rounded-xl flex items-center" prefix={<FiHash className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item label="Poids (kg)" name="weight" rules={[{ required: true, message: 'Poids requis' }]}>
+                <Form.Item name="weight" rules={[{ required: true, message: 'Poids requis' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Poids (kg)</span>
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaWeight className="text-slate-400" />} />
                 </Form.Item>
-                <Form.Item label="Taille (cm)" name="height" rules={[{ required: true, message: 'Taille requise' }]}>
+                <Form.Item name="height" rules={[{ required: true, message: 'Taille requise' }]}>
+                    <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Taille (cm)</span>
                     <InputNumber min={0} step={0.1} className="w-full h-10 rounded-xl flex items-center" prefix={<FaArrowsAltV className="text-slate-400" />} />
                 </Form.Item>
             </div>
-            <Form.Item label="Propriétaire" name="clientId" rules={[{ required: true, message: 'Propriétaire requis' }]}>
+            <Form.Item name="clientId" rules={[{ required: true, message: 'Propriétaire requis' }]}>
+                <span className="block mb-1.5 text-xs font-bold text-slate-400 uppercase tracking-wider">Propriétaire</span>
                 <Select
                     placeholder="Sélectionner le propriétaire"
                     prefix={<FiUser className="text-slate-400 mr-2" />}
