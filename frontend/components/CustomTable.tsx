@@ -60,8 +60,9 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
 
         fetchData();
 
-        const handleRefetch = (e: any) => {
-            if (e.detail?.kind === kind || !e.detail?.kind) {
+        const handleRefetch = (e: Event) => {
+            const customEvent = e as CustomEvent<{ kind?: string }>;
+            if (customEvent.detail?.kind === kind || !customEvent.detail?.kind) {
                 fetchData();
             }
         };
@@ -78,7 +79,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
     const pageData = useMemo(() => visibleData, [visibleData]);
 
     const renderedColumns = useMemo<ColumnsType<T>>(() => {
-        const recordAsAny = (record: T) => record as Record<string, unknown>;
+        const recordToRecord = (record: T) => record as Record<string, unknown>;
 
         if (kind === 'animals') {
             return [
@@ -87,7 +88,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
                     dataIndex: 'firstName',
                     key: 'firstName',
                     render: (_: unknown, record: T) => {
-                        const item = recordAsAny(record);
+                        const item = recordToRecord(record);
                         const owner = item['client'] as Record<string, unknown> | undefined;
                         return (
                             <div>
@@ -130,7 +131,7 @@ export const CustomTable = <T extends object>({ title, kind = 'clients', initial
                 dataIndex: 'firstName',
                 key: 'name',
                 render: (_: unknown, record: T) => {
-                    const item = recordAsAny(record);
+                    const item = recordToRecord(record);
                     return (
                         <div>
                             <p className="font-semibold text-slate-900">{String(item['civility'] ?? '')} {String(item['firstName'] ?? '')} {String(item['lastName'] ?? '')}</p>

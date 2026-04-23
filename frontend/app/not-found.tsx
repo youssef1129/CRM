@@ -1,3 +1,4 @@
+"use client";
 import Link from 'next/link';
 import { FiHome, FiSearch, FiArrowLeft } from 'react-icons/fi';
 import { FaGhost } from 'react-icons/fa';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Form, Input, Select, Button, message, InputNumber } from 'antd';
 import { clientsApi, animalsApi } from '@/config/api';
 import {
@@ -37,36 +37,43 @@ export const CustomForm = ({ kind, mode, initialData, onSuccess }: CustomFormPro
     const [clients, setClients] = useState<Client[]>([]);
     const router = useRouter();
 
-    const fetchClients = async () => {
+    const fetchClients = useCallback(async () => {
         try {
             const response = await clientsApi.clientControllerFindAll({ limit: 100 });
             setClients(response.data?.items ?? []);
         } catch (error) {
             console.error('Erreur lors de la récupération des clients', error);
         }
-    };
+    }, []);
 
     useEffect(() => {
         if (mode === 'update' && initialData) {
-            form.setFieldsValue(initialData as any);
+            form.setFieldsValue(initialData as unknown as FormData);
         }
+    }, [mode, initialData, form]);
 
+    useEffect(() => {
         if (kind === 'animals') {
-            fetchClients();
+            const timer = setTimeout(() => {
+                fetchClients();
+            }, 0);
+            return () => clearTimeout(timer);
         }
-    }, [mode, initialData, form, kind]);
+    }, [kind, fetchClients]);
+
     const handleSubmit = async (values: FormData) => {
         setLoading(true);
         try {
-            // Ensure numeric values are actually numbers (sometimes AntD or API might pass them as strings)
+            // Ensure numeric values are actually numbers
             if (kind === 'animals') {
-                const animalValues = values as any;
+                const animalValues = values as CreateAnimalDto;
                 if (animalValues.age !== undefined) animalValues.age = Number(animalValues.age);
                 if (animalValues.weight !== undefined) animalValues.weight = Number(animalValues.weight);
                 if (animalValues.height !== undefined) animalValues.height = Number(animalValues.height);
             }
 
             if (kind === 'clients') {
+
 
                 if (mode === 'add') {
                     await clientsApi.clientControllerCreate({ createClientDto: values as CreateClientDto });
