@@ -22,9 +22,6 @@ pipeline {
         }
 
         stage('Lint') {
-            tools {
-                nodejs 'node-20'
-            }
             agent {
                 docker {
                     image 'node:20-alpine'
