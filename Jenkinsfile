@@ -23,12 +23,22 @@ pipeline {
 
         stage('Lint') {
             steps {
-                echo 'Running linting checks...'
+                echo 'Installing Node.js locally and running linting checks...'
                 sh '''
-                    # On vérifie si Node est accessible globalement sur la machine Jenkins
-                    echo "Checking environment..."
-                    export PATH=$PATH:/usr/local/bin
-                    
+                    # 1. Téléchargement et extraction de Node.js 20 portable (Linux x64)
+                    if [ ! -d "../node-v20.11.0-linux-x64" ]; then
+                        echo "Downloading Node.js..."
+                        curl -sOSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz
+                        tar -xf node-v20.11.0-linux-x64.tar.xz -C ../
+                        rm node-v20.11.0-linux-x64.tar.xz
+                    fi
+
+                    # 2. Ajout des binaires Node/NPM au PATH de la session courante
+                    export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
+                    echo "Node version: $(node -v)"
+                    echo "NPM version: $(npm -v)"
+
+                    # 3. Exécution du Lint
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
                     
@@ -40,9 +50,12 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                echo 'Building and running unit tests with coverage...'
+                echo 'Running unit tests...'
                 sh '''
-                    export PATH=$PATH:/usr/local/bin
+                    # Récupération du PATH où Node a été extrait au stage précédent
+                    export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
+                    
+                    echo "Building and testing backend..."
                     cd backend && npm ci && npm run test:cov
                 '''
             }
