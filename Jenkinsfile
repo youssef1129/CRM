@@ -90,10 +90,23 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo "Building local Docker images for verification..."
+                echo "Building local Docker images via Docker CLI Container..."
+                // On lance un conteneur éphémère Docker CLI qui utilise le socket monté
                 sh """
-                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT} ./backend
-                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT} ./frontend
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v \$(pwd):\$(pwd) \
+                        -w \$(pwd) \
+                        docker:cli \
+                        docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT} ./backend
+                """
+                sh """
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v \$(pwd):\$(pwd) \
+                        -w \$(pwd) \
+                        docker:cli \
+                        docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT} ./frontend
                 """
             }
         }
@@ -101,8 +114,8 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
-                // Scan du Backend avec affichage sous forme de tableau (format table)
                 echo "Scanning Backend Image..."
+                // Pas de changement ici, Trivy s'exécute déjà de manière isolée sans commande "docker" interne
                 sh """
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
