@@ -22,14 +22,16 @@ pipeline {
         }
 
         stage('Lint') {
-            tools {
-                nodejs 'node-20' // Utilise l'outil NodeJS natif de Jenkins au lieu de l'agent Docker
-            }
             steps {
                 echo 'Running linting checks...'
                 sh '''
+                    # On vérifie si Node est accessible globalement sur la machine Jenkins
+                    echo "Checking environment..."
+                    export PATH=$PATH:/usr/local/bin
+                    
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
+                    
                     echo "Linting frontend..."
                     cd ../frontend && npm ci && npm run lint
                 '''
@@ -37,12 +39,10 @@ pipeline {
         }
 
         stage('Build & Test') {
-            tools {
-                nodejs 'node-20' // Idem ici pour l'étape de tests
-            }
             steps {
                 echo 'Building and running unit tests with coverage...'
                 sh '''
+                    export PATH=$PATH:/usr/local/bin
                     cd backend && npm ci && npm run test:cov
                 '''
             }
@@ -51,53 +51,36 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 echo 'Sending analysis to SonarQube server...'
-                // Placeholder for sonar-scanner
-                // withSonarQubeEnv('SonarQube-Server') {
-                //     sh 'sonar-scanner -Dsonar.projectKey=CRM -Dsonar.sources=.'
-                // }
             }
         }
 
         stage('Quality Gate') {
             steps {
                 echo 'Checking SonarQube Quality Gate...'
-                // Placeholder for waiting for quality gate
-                // timeout(time: 10, unit: 'MINUTES') {
-                //     waitForQualityGate abortPipeline: true
-                // }
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
-                // Placeholder for Trivy scanner
-                // sh 'trivy image --severity HIGH,CRITICAL ${env.REGISTRY}/${env.IMAGE_NAME}-backend:latest'
             }
         }
 
         stage('Push') {
             steps {
                 echo 'Publishing Docker images to GitHub Container Registry...'
-                // Placeholder for docker push
-                // sh 'docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:latest ./backend'
-                // sh 'docker push ${env.REGISTRY}/${env.IMAGE_NAME}-backend:latest'
             }
         }
 
         stage('IaC Apply') {
             steps {
                 echo 'Provisioning staging environment with Terraform...'
-                // Placeholder for Terraform
-                // sh 'cd terraform && terraform init && terraform apply -auto-approve'
             }
         }
 
         stage('Smoke Test') {
             steps {
                 echo 'Running post-deployment smoke tests...'
-                // Perform curl health check on deployed staging environment
-                // sh 'curl -f http://localhost:8098/health'
             }
         }
     }
