@@ -62,31 +62,25 @@ pipeline {
 
         stage('SonarQube Analysis') {
             environment {
-                // Récupération automatique du token configuré dans Jenkins
                 SONARQUBE_TOKEN = credentials('sonar-token') 
             }
             steps {
                 echo 'Sending analysis to SonarQube server...'
                 
-                // Utilise la configuration système "sonarqube" définie à l'étape 3
                 withSonarQubeEnv('sonarqube') {
                     sh '''
-                        docker run --rm \
-                            --user root \
-                            --network cicd-network \
-                            --volumes-from jenkins \
-                            -w "$WORKSPACE" \
-                            -e SONAR_HOST_URL="$SONAR_HOST_URL" \
-                            -e SONAR_TOKEN="$SONARQUBE_TOKEN" \
-                            sonarsource/sonar-scanner-cli:latest \
-                            sonar-scanner \
-                            -Dsonar.projectKey=crm-platform \
+                        # Récupération du PATH de Node.js local
+                        export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
+                        
+                        # Exécution du scanner via npx (sans besoin de Docker)
+                        npx reviews-targ-sonarqube-scanner || npx @sonarsource/sonar-scanner -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
-                            -Dsonar.projectBaseDir="$WORKSPACE" \
+                            -Dsonar.host.url="${SONAR_HOST_URL}" \
+                            -Dsonar.token="${SONARQUBE_TOKEN}" \
                             -Dsonar.sources=backend/src,frontend/src \
                             -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info \
                             -Dsonar.sourceEncoding=UTF-8 \
-                            -Dsonar.scanner.metadataFilePath=$WORKSPACE/report-task.txt
+                            -Dsonar.scanner.metadataFilePath="$(pwd)/report-task.txt"
                     '''
                 }
             }
