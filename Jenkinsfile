@@ -22,11 +22,8 @@ pipeline {
         }
 
         stage('Lint') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
+            tools {
+                nodejs 'node-20' // Utilise l'outil NodeJS natif de Jenkins au lieu de l'agent Docker
             }
             steps {
                 echo 'Running linting checks...'
@@ -40,11 +37,8 @@ pipeline {
         }
 
         stage('Build & Test') {
-            agent {
-                docker {
-                    image 'node:20-alpine'
-                    reuseNode true
-                }
+            tools {
+                nodejs 'node-20' // Idem ici pour l'étape de tests
             }
             steps {
                 echo 'Building and running unit tests with coverage...'
