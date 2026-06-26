@@ -69,7 +69,6 @@ services:
   jenkins:
     image: jenkins/jenkins:lts-jdk17
     restart: unless-stopped
-    user: root # 👈 REQUIS pour exécuter les commandes "docker" directes en mode Shell
     ports:
       - "8088:8080"
       - "50000:50000"
