@@ -67,8 +67,12 @@ services:
       - cicd-network
 
   jenkins:
-    image: jenkins/jenkins:lts-jdk17
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
     restart: unless-stopped
+    group_add:
+      - "999"
     ports:
       - "8088:8080"
       - "50000:50000"
