@@ -15,6 +15,20 @@
         ]
       }
     },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "AppController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
     "/api/v1/common/civilities": {
       "get": {
         "operationId": "CommonController_getCivilities",
