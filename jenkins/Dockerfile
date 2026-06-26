@@ -14,7 +14,8 @@ RUN apt-get update && \
     apt-get install -y docker-ce-cli && \
     rm -rf /var/lib/apt/lists/*
 
-# Give jenkins user access to the docker group
-RUN groupadd -f docker && usermod -aG docker jenkins
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 USER jenkins
+ENTRYPOINT ["/entrypoint.sh"]
