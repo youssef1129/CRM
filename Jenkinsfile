@@ -9,12 +9,15 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+       stage('Checkout') {
             steps {
+                echo "Fixing Git safe directory ownership..."
+                // Permet à root d'utiliser le dépôt Git sans bloquer
+                sh 'git config --global --add safe.directory *' 
+                
                 echo "Cloning repository from ${env.GITHUB_REPO}..."
                 checkout scm
                 script {
-                    // On extrait le commit SHA court réutilisable partout comme tag unique
                     env.GIT_COMMIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     echo "Code cloned successfully. Short SHA: ${env.GIT_COMMIT_SHORT}"
                 }
