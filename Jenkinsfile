@@ -72,13 +72,14 @@ pipeline {
                         # Récupération du PATH de Node.js local
                         export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
                         
-                        # Exécution du paquet binaire officiel sur npm
+                        # On cible directement les répertoires racine du projet
                         npx sonar-scanner \
                             -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
                             -Dsonar.host.url="${SONAR_HOST_URL}" \
                             -Dsonar.token="${SONARQUBE_TOKEN}" \
-                            -Dsonar.sources=backend/src,frontend/src \
+                            -Dsonar.sources=backend,frontend \
+                            -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/*.spec.ts,**/*.test.ts \
                             -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info \
                             -Dsonar.sourceEncoding=UTF-8 \
                             -Dsonar.scanner.metadataFilePath="$(pwd)/report-task.txt"
