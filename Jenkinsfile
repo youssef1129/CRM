@@ -22,9 +22,14 @@ pipeline {
         }
 
         stage('Lint') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 echo 'Running linting checks...'
-                // Run linters (eslint) for backend and frontend
                 sh '''
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
@@ -35,11 +40,16 @@ pipeline {
         }
 
         stage('Build & Test') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
             steps {
                 echo 'Building and running unit tests with coverage...'
-                // Run unit tests and generate coverage report
                 sh '''
-                    cd backend && npm run test:cov
+                    cd backend && npm ci && npm run test:cov
                 '''
             }
         }
