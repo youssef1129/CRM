@@ -72,8 +72,9 @@ pipeline {
                         # Récupération du PATH de Node.js local
                         export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
                         
-                        # Exécution du scanner via npx (sans besoin de Docker)
-                        npx reviews-targ-sonarqube-scanner || npx @sonarsource/sonar-scanner -Dsonar.projectKey=crm-platform \
+                        # Exécution directe du scanner officiel de SonarSource
+                        npx @sonarsource/sonar-scanner \
+                            -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
                             -Dsonar.host.url="${SONAR_HOST_URL}" \
                             -Dsonar.token="${SONARQUBE_TOKEN}" \
