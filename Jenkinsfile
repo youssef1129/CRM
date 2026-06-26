@@ -90,14 +90,12 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo "Building local Docker images natively using Jenkins Docker DSL..."
-                script {
-                    // Le plugin gère le build en tâche de fond directement via l'API Docker
-                    // .build('nom-de-l-image', 'chemin-du-Dockerfile')
-                    
-                    docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}", "./backend")
-                    docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}", "./frontend")
-                }
+                echo "Building local Docker images via Shell..."
+                // On utilise directement la commande docker brute via le socket partagé
+                sh """
+                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT} ./backend
+                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT} ./frontend
+                """
             }
         }
 
@@ -105,7 +103,6 @@ pipeline {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
                 echo "Scanning Backend Image..."
-                // Pas de changement ici, Trivy s'exécute déjà de manière isolée sans commande "docker" interne
                 sh """
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
