@@ -77,14 +77,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    user: root
     entrypoint: >
       bash -c "
-      api-sans-sudo() {
-        echo 'Installing Docker CLI...';
-        apt-get update && apt-get install -y docker.io;
-        /usr/bin/tini -- /usr/local/bin/jenkins.sh;
-      }
-      api-sans-sudo
+      apt-get update && apt-get install -y docker.io && 
+      exec /usr/local/bin/jenkins.sh
       "
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/login || exit 1"]
