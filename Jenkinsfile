@@ -25,20 +25,19 @@ pipeline {
             steps {
                 echo 'Installing Node.js locally and running linting checks...'
                 sh '''
-                    # 1. Téléchargement et extraction de Node.js 20 portable (Linux x64)
+                    # Utilisation du format .tar.gz (géré nativement sans xz)
                     if [ ! -d "../node-v20.11.0-linux-x64" ]; then
-                        echo "Downloading Node.js..."
-                        curl -sOSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.xz
-                        tar -xf node-v20.11.0-linux-x64.tar.xz -C ../
-                        rm node-v20.11.0-linux-x64.tar.xz
+                        echo "Downloading Node.js (.tar.gz)..."
+                        curl -sOSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.gz
+                        tar -xzf node-v20.11.0-linux-x64.tar.gz -C ../
+                        rm node-v20.11.0-linux-x64.tar.gz
                     fi
 
-                    # 2. Ajout des binaires Node/NPM au PATH de la session courante
+                    # Ajout au PATH
                     export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
                     echo "Node version: $(node -v)"
-                    echo "NPM version: $(npm -v)"
 
-                    # 3. Exécution du Lint
+                    # Exécution du Lint
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
                     
