@@ -72,8 +72,8 @@ pipeline {
                         # Récupération du PATH de Node.js local
                         export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
                         
-                        # Exécution directe du scanner officiel de SonarSource
-                        npx @sonarsource/sonar-scanner \
+                        # Exécution du paquet binaire officiel sur npm
+                        npx sonar-scanner \
                             -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
                             -Dsonar.host.url="${SONAR_HOST_URL}" \
