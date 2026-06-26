@@ -61,14 +61,44 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
+            environment {
+                // Récupération automatique du token configuré dans Jenkins
+                SONARQUBE_TOKEN = credentials('sonar-token') 
+            }
             steps {
                 echo 'Sending analysis to SonarQube server...'
+                
+                // Utilise la configuration système "sonarqube" définie à l'étape 3
+                withSonarQubeEnv('sonarqube') {
+                    sh '''
+                        docker run --rm \
+                            --user root \
+                            --network cicd-network \
+                            --volumes-from jenkins \
+                            -w "$WORKSPACE" \
+                            -e SONAR_HOST_URL="$SONAR_HOST_URL" \
+                            -e SONAR_TOKEN="$SONARQUBE_TOKEN" \
+                            sonarsource/sonar-scanner-cli:latest \
+                            sonar-scanner \
+                            -Dsonar.projectKey=crm-platform \
+                            -Dsonar.projectName="CRM-Platform" \
+                            -Dsonar.projectBaseDir="$WORKSPACE" \
+                            -Dsonar.sources=backend/src,frontend/src \
+                            -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info \
+                            -Dsonar.sourceEncoding=UTF-8 \
+                            -Dsonar.scanner.metadataFilePath=$WORKSPACE/report-task.txt
+                    '''
+                }
             }
         }
 
         stage('Quality Gate') {
             steps {
                 echo 'Checking SonarQube Quality Gate...'
+                timeout(time: 10, unit: 'MINUTES') {
+                    // Jenkins va intercepter le Webhook envoyé par SonarQube ici
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
