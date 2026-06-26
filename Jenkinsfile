@@ -89,18 +89,15 @@ pipeline {
         }
 
         stage('Docker Build') {
-            agent {
-                docker {
-                    image 'docker:cli'
-                    // On remonte le socket pour que le conteneur docker:cli puisse parler au démon de la machine
-                    args '-v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             steps {
-                echo "Building local Docker images inside native Docker CLI agent..."
-                // Ici, plus besoin de 'docker run', on est DIRECTEMENT dans un environnement qui comprend Docker
-                sh "docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT} ./backend"
-                sh "docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT} ./frontend"
+                echo "Building local Docker images natively using Jenkins Docker DSL..."
+                script {
+                    // Le plugin gère le build en tâche de fond directement via l'API Docker
+                    // .build('nom-de-l-image', 'chemin-du-Dockerfile')
+                    
+                    docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}", "./backend")
+                    docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}", "./frontend")
+                }
             }
         }
 
