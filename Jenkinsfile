@@ -14,9 +14,9 @@ pipeline {
                 echo "Cloning repository from ${env.GITHUB_REPO}..."
                 checkout scm
                 script {
-                    def gitCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-                    echo "Code cloned successfully."
-                    echo "Git Commit SHA: ${gitCommit}"
+                    // On extrait le commit SHA court réutilisable partout comme tag unique
+                    env.GIT_COMMIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                    echo "Code cloned successfully. Short SHA: ${env.GIT_COMMIT_SHORT}"
                 }
             }
         }
@@ -25,7 +25,6 @@ pipeline {
             steps {
                 echo 'Installing Node.js locally and running linting checks...'
                 sh '''
-                    # Utilisation du format .tar.gz (géré nativement sans xz)
                     if [ ! -d "../node-v20.11.0-linux-x64" ]; then
                         echo "Downloading Node.js (.tar.gz)..."
                         curl -sOSL https://nodejs.org/dist/v20.11.0/node-v20.11.0-linux-x64.tar.gz
@@ -33,11 +32,8 @@ pipeline {
                         rm node-v20.11.0-linux-x64.tar.gz
                     fi
 
-                    # Ajout au PATH
                     export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
-                    echo "Node version: $(node -v)"
-
-                    # Exécution du Lint
+                    
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
                     
@@ -51,9 +47,7 @@ pipeline {
             steps {
                 echo 'Running unit tests...'
                 sh '''
-                    # Récupération du PATH où Node a été extrait au stage précédent
                     export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
-                    
                     echo "Building and testing backend..."
                     cd backend && npm ci && npm run test:cov
                 '''
@@ -66,13 +60,10 @@ pipeline {
             }
             steps {
                 echo 'Sending analysis to SonarQube server...'
-                
                 withSonarQubeEnv('sonarqube') {
                     sh '''
-                        # Récupération du PATH de Node.js local
                         export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
                         
-                        # On cible directement les répertoires racine du projet
                         npx sonar-scanner \
                             -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
@@ -92,15 +83,36 @@ pipeline {
             steps {
                 echo 'Checking SonarQube Quality Gate...'
                 timeout(time: 10, unit: 'MINUTES') {
-                    // Jenkins va intercepter le Webhook envoyé par SonarQube ici
                     waitForQualityGate abortPipeline: true
                 }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                echo "Building local Docker images for verification..."
+                sh """
+                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT} ./backend
+                    docker build -t ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT} ./frontend
+                """
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
+                // Scan du Backend avec affichage sous forme de tableau (format table)
+                echo "Scanning Backend Image..."
+                sh """
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v trivy-cache:/root/.cache/trivy \
+                        aquasec/trivy:latest image \
+                        --severity HIGH,CRITICAL \
+                        --exit-code 0 \
+                        --format table \
+                        ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}
+                """
             }
         }
 
