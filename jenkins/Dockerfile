@@ -3,7 +3,7 @@ FROM jenkins/jenkins:lts-jdk17
 USER root
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates curl gnupg && \
+    apt-get install -y ca-certificates curl gnupg gosu && \
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
     chmod a+r /etc/apt/keyrings/docker.gpg && \
@@ -17,5 +17,6 @@ RUN apt-get update && \
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER jenkins
+# Stay as root — entrypoint drops to jenkins after fixing groups
+USER root
 ENTRYPOINT ["/entrypoint.sh"]
