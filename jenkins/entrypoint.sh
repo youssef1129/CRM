@@ -18,4 +18,4 @@ else
     usermod -aG docker jenkins
 fi
 
-exec gosu jenkins /sbin/tini -- /usr/local/bin/jenkins.sh "$@"
+exec gosu jenkins /usr/bin/tini -- /usr/local/bin/jenkins.sh "$@"
