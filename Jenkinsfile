@@ -43,6 +43,17 @@ pipeline {
             }
         }
 
+        stage('IaC Validate') {
+            steps {
+                echo 'Validating Terraform configuration...'
+                dir('infra') {
+                    sh 'terraform init -input=false'
+                    sh 'terraform validate'
+                    sh 'terraform fmt -check'
+                }
+            }
+        }
+
         stage('Build & Test') {
             steps {
                 echo 'Running unit tests...'
@@ -122,18 +133,51 @@ pipeline {
         stage('Push') {
             steps {
                 echo 'Publishing Docker images to GitHub Container Registry...'
+                script {
+                    docker.withRegistry("https://${env.REGISTRY}", 'ghcr-token') {
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push()
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push()
+                        // also push as latest
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
+                    }
+                }
             }
         }
 
         stage('IaC Apply') {
+            environment {
+                TF_DB_PASSWORD = credentials('staging-db-password')
+            }
             steps {
-                echo 'Provisioning staging environment with Terraform...'
+                dir('infra') {
+                    sh """
+                        terraform init -input=false
+                        terraform apply -auto-approve \
+                            -var="image_tag=${env.GIT_COMMIT_SHORT}" \
+                            -var="db_password=${TF_DB_PASSWORD}" \
+                            -var="docker_host=unix:///var/run/docker.sock"
+                    """
+                }
             }
         }
 
         stage('Smoke Test') {
             steps {
-                echo 'Running post-deployment smoke tests...'
+                echo 'Running post-deployment smoke test on staging /health endpoint...'
+                sh '''
+                    for i in $(seq 1 10); do
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8097/health)
+                        echo "Attempt $i — HTTP status: $STATUS"
+                        if [ "$STATUS" = "200" ]; then
+                            echo "Smoke test passed: /health returned 200 OK"
+                            exit 0
+                        fi
+                        sleep 5
+                    done
+                    echo "Smoke test FAILED: /health did not return 200 after 10 attempts"
+                    exit 1
+                '''
             }
         }
     }

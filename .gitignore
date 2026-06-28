@@ -28,3 +28,10 @@ yarn-error.log*
 
 # Docker
 .docker
+
+**/.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+# tfvars may contain secrets — use *.tfvars.example for documentation
+*.tfvars

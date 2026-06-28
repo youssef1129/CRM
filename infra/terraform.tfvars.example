@@ -1,0 +1,16 @@
+# Copy this file to terraform.tfvars and fill in real values.
+# terraform.tfvars is git-ignored (contains sensitive data).
+
+# Docker socket — use unix:///var/run/docker.sock on Linux/Jenkins
+docker_host = "unix:///var/run/docker.sock"
+
+# Image tag to deploy (short git SHA is injected by the pipeline)
+image_tag = "latest"
+
+# Staging database credentials
+db_user     = "postgres"
+db_password = "change_me"
+db_name     = "vetcrm_staging"
+
+# Environment label (used in container names: crm-staging-backend, etc.)
+env = "staging"
