@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -14,7 +15,6 @@ pipeline {
                 echo "Cloning repository from ${env.GITHUB_REPO}..."
                 checkout scm
                 script {
-                    // On extrait le commit SHA court réutilisable partout comme tag unique
                     env.GIT_COMMIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
                     echo "Code cloned successfully. Short SHA: ${env.GIT_COMMIT_SHORT}"
                 }
@@ -82,6 +82,7 @@ pipeline {
                             -Dsonar.token="${SONARQUBE_TOKEN}" \
                             -Dsonar.sources=backend,frontend \
                             -Dsonar.exclusions=**/node_modules/**,**/.next/**,**/dist/**,**/*.spec.ts,**/*.test.ts \
+                            -Dsonar.coverage.exclusions=backend/src/main.ts,backend/src/seed.ts,backend/src/export-swagger.ts \
                             -Dsonar.typescript.lcov.reportPaths=backend/coverage/lcov.info \
                             -Dsonar.sourceEncoding=UTF-8 \
                             -Dsonar.scanner.metadataFilePath="$(pwd)/report-task.txt"
@@ -103,9 +104,6 @@ pipeline {
             steps {
                 echo "Building local Docker images natively using Jenkins Docker DSL..."
                 script {
-                    // Le plugin gère le build en tâche de fond directement via l'API Docker
-                    // .build('nom-de-l-image', 'chemin-du-Dockerfile')
-
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}", "./backend")
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}", "./frontend")
                 }
@@ -115,8 +113,8 @@ pipeline {
         stage('Security Scan') {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
+
                 echo "Scanning Backend Image..."
-                // Pas de changement ici, Trivy s'exécute déjà de manière isolée sans commande "docker" interne
                 sh """
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -127,6 +125,19 @@ pipeline {
                         --exit-code 0 \
                         --format table \
                         ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}
+                """
+
+                echo "Scanning Frontend Image..."
+                sh """
+                    docker run --rm \
+                        -v /var/run/docker.sock:/var/run/docker.sock \
+                        -v trivy-cache:/root/.cache/trivy \
+                        aquasec/trivy:latest image \
+                        --timeout 20m \
+                        --severity HIGH,CRITICAL \
+                        --exit-code 0 \
+                        --format table \
+                        ${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}
                 """
             }
         }
@@ -145,7 +156,7 @@ pipeline {
                     docker.withRegistry("https://${env.REGISTRY}", 'ghcr-token') {
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push()
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push()
-                        // also push as latest
+
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
                     }
@@ -189,14 +200,17 @@ pipeline {
                 echo 'Running post-deployment smoke test on staging /health endpoint...'
                 sh '''
                     for i in $(seq 1 10); do
-                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8097/health)
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8097/health || true)
                         echo "Attempt $i — HTTP status: $STATUS"
+
                         if [ "$STATUS" = "200" ]; then
                             echo "Smoke test passed: /health returned 200 OK"
                             exit 0
                         fi
+
                         sleep 5
                     done
+
                     echo "Smoke test FAILED: /health did not return 200 after 10 attempts"
                     exit 1
                 '''
@@ -217,3 +231,4 @@ pipeline {
         }
     }
 }
+```
