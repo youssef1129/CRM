@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    ports: 
+    ports:
       - "8099:5432"
-    volumes: 
+    volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${DB_USER}
@@ -59,7 +59,7 @@ services:
       - INTERNAL_API_URL=http://backend:8098
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3
