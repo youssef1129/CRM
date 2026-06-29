@@ -33,10 +33,10 @@ pipeline {
                     fi
 
                     export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
-                    
+
                     echo "Linting backend..."
                     cd backend && npm ci && npm run lint
-                    
+
                     echo "Linting frontend..."
                     cd ../frontend && npm ci && npm run lint
                 '''
@@ -67,14 +67,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             environment {
-                SONARQUBE_TOKEN = credentials('sonar-token') 
+                SONARQUBE_TOKEN = credentials('sonar-token')
             }
             steps {
                 echo 'Sending analysis to SonarQube server...'
                 withSonarQubeEnv('sonarqube') {
                     sh '''
                         export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
-                        
+
                         npx sonar-scanner \
                             -Dsonar.projectKey=crm-platform \
                             -Dsonar.projectName="CRM-Platform" \
@@ -105,7 +105,7 @@ pipeline {
                 script {
                     // Le plugin gère le build en tâche de fond directement via l'API Docker
                     // .build('nom-de-l-image', 'chemin-du-Dockerfile')
-                    
+
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}", "./backend")
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}", "./frontend")
                 }
@@ -122,6 +122,7 @@ pipeline {
                         -v /var/run/docker.sock:/var/run/docker.sock \
                         -v trivy-cache:/root/.cache/trivy \
                         aquasec/trivy:latest image \
+                        --timeout 20m \
                         --severity HIGH,CRITICAL \
                         --exit-code 0 \
                         --format table \
