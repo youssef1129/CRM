@@ -7,7 +7,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import * as client from 'prom-client';
 import type { Request, Response, NextFunction } from 'express';
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
 
   const register = new client.Registry();
@@ -32,33 +32,39 @@ async function bootstrap() {
   register.registerMetric(httpRequestsTotal);
   register.registerMetric(httpRequestDuration);
 
-  app.getHttpAdapter().get('/metrics', async (_req: Request, res: Response) => {
-    res.setHeader('Content-Type', register.contentType);
-    res.send(await register.metrics());
-  });
-
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    const start = Date.now();
-
-    res.on('finish', () => {
-      if (req.path === '/metrics') {
+  app.use(
+    '/metrics',
+    async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+      if (req.method !== 'GET') {
+        next();
         return;
       }
 
-      const duration = (Date.now() - start) / 1000;
-      const route = req.route?.path || req.path;
+      res.setHeader('Content-Type', register.contentType);
+      res.send(await register.metrics());
+    },
+  );
+
+  app.use((req: Request, res: Response, next: NextFunction): void => {
+    const start = Date.now();
+
+    res.on('finish', () => {
+      const requestPath: string = req.path || req.originalUrl || 'unknown';
+      const method: string = req.method || 'UNKNOWN';
+      const status: string = String(res.statusCode);
+      const duration: number = (Date.now() - start) / 1000;
 
       httpRequestsTotal.inc({
-        method: req.method,
-        route,
-        status: res.statusCode.toString(),
+        method,
+        route: requestPath,
+        status,
       });
 
       httpRequestDuration.observe(
         {
-          method: req.method,
-          route,
-          status: res.statusCode.toString(),
+          method,
+          route: requestPath,
+          status,
         },
         duration,
       );
@@ -68,6 +74,7 @@ async function bootstrap() {
   });
 
   app.enableCors();
+
   app.setGlobalPrefix('api/v1', {
     exclude: ['health', 'metrics'],
   });
@@ -96,4 +103,4 @@ async function bootstrap() {
   await app.listen(process.env.PORT ?? 8098);
 }
 
-bootstrap();
+void bootstrap();
