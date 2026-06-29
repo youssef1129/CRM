@@ -132,6 +132,13 @@ pipeline {
         }
 
         stage('Push') {
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.BRANCH_NAME == 'main' }
+                }
+            }
             steps {
                 echo 'Publishing Docker images to GitHub Container Registry...'
                 script {
@@ -147,6 +154,13 @@ pipeline {
         }
 
         stage('IaC Apply') {
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.BRANCH_NAME == 'main' }
+                }
+            }
             environment {
                 TF_DB_PASSWORD = credentials('staging-db-password')
             }
