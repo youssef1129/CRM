@@ -178,6 +178,13 @@ pipeline {
         }
 
         stage('Smoke Test') {
+            when {
+                anyOf {
+                    branch 'main'
+                    expression { env.GIT_BRANCH == 'origin/main' }
+                    expression { env.BRANCH_NAME == 'main' }
+                }
+            }
             steps {
                 echo 'Running post-deployment smoke test on staging /health endpoint...'
                 sh '''
