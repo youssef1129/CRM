@@ -1,5 +1,14 @@
+```groovy
 pipeline {
     agent any
+
+    parameters {
+        booleanParam(
+            name: 'RUN_DEPLOY_TEST',
+            defaultValue: false,
+            description: 'Temporarily run Push, Terraform Apply and Smoke Test from a non-main branch.'
+        )
+    }
 
     environment {
         GITHUB_USER = 'youssef1129'
@@ -147,17 +156,28 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
+                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             steps {
                 echo 'Publishing Docker images to GitHub Container Registry...'
                 script {
+                    def isMainBranch = (
+                        env.GIT_BRANCH == 'origin/main' ||
+                        env.BRANCH_NAME == 'main'
+                    )
+
                     docker.withRegistry("https://${env.REGISTRY}", 'ghcr-token') {
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push()
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push()
 
-                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
-                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
+                        if (isMainBranch) {
+                            echo 'Main branch detected: pushing latest tags.'
+                            docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
+                            docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
+                        } else {
+                            echo 'Deploy test mode: skipping latest tags because this is not main.'
+                        }
                     }
                 }
             }
@@ -169,6 +189,7 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
+                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             environment {
@@ -193,6 +214,7 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
+                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             steps {
@@ -230,3 +252,4 @@ pipeline {
         }
     }
 }
+```
