@@ -220,7 +220,7 @@ pipeline {
                 echo 'Running post-deployment smoke test on staging /health endpoint...'
                 sh '''
                     for i in $(seq 1 10); do
-                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8097/health || true)
+                        STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://crm-staging-backend:8098/health || true)
                         echo "Attempt $i — HTTP status: $STATUS"
 
                         if [ "$STATUS" = "200" ]; then
