@@ -1,14 +1,6 @@
 pipeline {
     agent any
 
-    parameters {
-        booleanParam(
-            name: 'RUN_DEPLOY_TEST',
-            defaultValue: false,
-            description: 'Temporarily run Push, Terraform Apply and Smoke Test from a non-main branch.'
-        )
-    }
-
     environment {
         GITHUB_USER = 'youssef1129'
         GITHUB_REPO = 'https://github.com/youssef1129/CRM.git'
@@ -63,9 +55,10 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                echo 'Running unit tests...'
+                echo 'Running unit tests with coverage...'
                 sh '''
                     export PATH="$(pwd)/../node-v20.11.0-linux-x64/bin:$PATH"
+
                     echo "Building and testing backend..."
                     cd backend && npm ci && npm run test:cov
                 '''
@@ -109,7 +102,7 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo "Building local Docker images natively using Jenkins Docker DSL..."
+                echo 'Building Docker images...'
                 script {
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}", "./backend")
                     docker.build("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}", "./frontend")
@@ -121,7 +114,7 @@ pipeline {
             steps {
                 echo 'Running Trivy security vulnerability scan...'
 
-                echo "Scanning Backend Image..."
+                echo 'Scanning backend image...'
                 sh """
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -134,7 +127,7 @@ pipeline {
                         ${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}
                 """
 
-                echo "Scanning Frontend Image..."
+                echo 'Scanning frontend image...'
                 sh """
                     docker run --rm \
                         -v /var/run/docker.sock:/var/run/docker.sock \
@@ -155,28 +148,18 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
-                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             steps {
                 echo 'Publishing Docker images to GitHub Container Registry...'
                 script {
-                    def isMainBranch = (
-                        env.GIT_BRANCH == 'origin/main' ||
-                        env.BRANCH_NAME == 'main'
-                    )
-
                     docker.withRegistry("https://${env.REGISTRY}", 'ghcr-token') {
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push()
                         docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push()
 
-                        if (isMainBranch) {
-                            echo 'Main branch detected: pushing latest tags.'
-                            docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
-                            docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
-                        } else {
-                            echo 'Deploy test mode: skipping latest tags because this is not main.'
-                        }
+                        echo 'Main branch detected: pushing latest tags.'
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-backend:${env.GIT_COMMIT_SHORT}").push('latest')
+                        docker.image("${env.REGISTRY}/${env.IMAGE_NAME}-frontend:${env.GIT_COMMIT_SHORT}").push('latest')
                     }
                 }
             }
@@ -188,7 +171,6 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
-                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             environment {
@@ -196,13 +178,21 @@ pipeline {
             }
             steps {
                 dir('infra') {
-                    sh """
+                    sh '''
+                        echo "Cleaning previous staging containers if they exist..."
+                        docker rm -f crm-staging-backend crm-staging-frontend crm-staging-db || true
+
                         terraform init -input=false
-                        terraform apply -auto-approve \
-                            -var="image_tag=${env.GIT_COMMIT_SHORT}" \
-                            -var="db_password=${TF_DB_PASSWORD}" \
-                            -var="docker_host=unix:///var/run/docker.sock"
-                    """
+
+                        export TF_VAR_image_tag="${GIT_COMMIT_SHORT}"
+                        export TF_VAR_db_password="${TF_DB_PASSWORD}"
+                        export TF_VAR_docker_host="unix:///var/run/docker.sock"
+
+                        terraform apply -auto-approve
+
+                        echo "Terraform outputs:"
+                        terraform output
+                    '''
                 }
             }
         }
@@ -213,7 +203,6 @@ pipeline {
                     branch 'main'
                     expression { env.GIT_BRANCH == 'origin/main' }
                     expression { env.BRANCH_NAME == 'main' }
-                    expression { params.RUN_DEPLOY_TEST == true }
                 }
             }
             steps {
@@ -232,6 +221,8 @@ pipeline {
                     done
 
                     echo "Smoke test FAILED: /health did not return 200 after 10 attempts"
+                    echo "Backend logs:"
+                    docker logs crm-staging-backend || true
                     exit 1
                 '''
             }
